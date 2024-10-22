@@ -12,5 +12,5 @@ client.on('messageCreate', (msg) => {
 client.on('ready', (a) => {
     console.log("Mars-le-tour!")
     console.log(`${client.user.username} is ready!`)
-    console.log(`${client.guilds.size}`)
+    console.log(client.guilds)
 })

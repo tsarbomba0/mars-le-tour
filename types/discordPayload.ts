@@ -6,12 +6,13 @@ export interface discordPayloadData extends Object {
     session_id: string;
     resume_gateway_url: string;
     guilds: Array<object>;
+    id: string;
 }
 
 export interface discordPayload extends Object {
-    s: string | null,
+    s: number | null,
     op: number | null,
     t: string | null,
-    d: discordPayloadData | null,
+    d: discordPayloadData,
 }
 
