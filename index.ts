@@ -6,6 +6,11 @@ client.on('messageCreate', (msg) => {
     if(msg.author.id == '1288517603337179166'){
         return;
     }
-    client.sendMessage("Test!", msg.channel_id)
+    console.log(client.guilds)
 })
  
+client.on('ready', (a) => {
+    console.log("Mars-le-tour!")
+    console.log(`${client.user.username} is ready!`)
+    console.log(`${client.guilds.size}`)
+})
