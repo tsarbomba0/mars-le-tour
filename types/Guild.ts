@@ -28,8 +28,8 @@ export interface Guild extends Object {
     emojis: Array<Object>; // TODO: EMOJI OBJECT
     features: Array<string> // TODO: GUILD FEATURE STRINGS
     mfa_level: number;
-    application_id: number | null; // TODO: SNOWFLAKE
-    system_channel_id: number | null; // TODO: SNOWFLAKE
+    application_id: string | null; // TODO: SNOWFLAKE
+    system_channel_id: string | null; // TODO: SNOWFLAKE
     system_channel_flags: number; 
     rules_channel_id: string | null; // TODO: SNOWFLAKE
     max_presences?: number | null;

@@ -1,9 +1,10 @@
 
 import { Guild } from "./Guild";
 import { GuildMember } from "./GuildMember";
+import { InteractionOptions } from "./Interaction";
 import { User } from "./User";
 
-export interface discordPayloadData extends Object, Guild, User, Omit<GuildMember, 'banner'|'avatar'|'avatar_decoration_data'> {
+export interface discordPayloadData extends Object, Omit<Guild, 'application_id'>, User, Omit<GuildMember, 'banner'|'avatar'|'avatar_decoration_data'>, InteractionOptions {
     heartbeat_interval: number
     user: User; 
     session_id: string;

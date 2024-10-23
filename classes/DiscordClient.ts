@@ -5,6 +5,7 @@ import { User } from "../types/User";
 import WebSocket from "ws";
 import { Guild } from "../types/Guild";
 import { GuildMember } from "../types/GuildMember";
+import { InteractionOptions } from "../types/Interaction";
 
 
 
@@ -118,11 +119,11 @@ export class DiscordClient extends EventEmitter {
                             */
                             // INTERACTION_CREATE
                             case Events.interactionCreate:
-                                gatewayData ? this.emit(Events.interactionCreate, gatewayData) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
+                                gatewayData ? this.emit(Events.interactionCreate, (gatewayData as InteractionOptions)) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
                             break;
 
                             /*
-                            Message events
+                            Message events TODO: Message object 
                             */
                             // MESSAGE_CREATE
                             case Events.messageCreate: 
@@ -142,7 +143,7 @@ export class DiscordClient extends EventEmitter {
                             break;
 
                             /*
-                            Message reaction events
+                            Message reaction events  TODO: Message object + Emoji object
                             */
                             // MESSAGE_REACTION_ADD
                             case Events.messageReactionAdd:
@@ -159,6 +160,34 @@ export class DiscordClient extends EventEmitter {
                             // MESSAGE_REACTION_REMOVE_EMOJI
                             case Events.messageReactionRemoveEmoji:
                                 gatewayData ? this.emit(Events.messageReactionRemoveEmoji, gatewayData) : () => {throw new Error(`Event ${Events.messageReactionRemoveEmoji} has null data`);}
+                            break;
+                            
+                            /*
+                            Thread events TODO: Message object 
+                            */
+                            // THREAD_CREATE
+                            case Events.threadCreate:
+                                gatewayData ? this.emit(Events.threadCreate, gatewayData) : () => {throw new Error(`Event ${Events.threadCreate} has null data`);}
+                            break;
+                            // THREAD_DELETE
+                            case Events.threadDelete:
+                                gatewayData ? this.emit(Events.threadDelete, gatewayData) : () => {throw new Error(`Event ${Events.threadDelete} has null data`);}
+                            break;
+                            // THREAD_UPDATE
+                            case Events.threadUpdate:
+                                gatewayData ? this.emit(Events.threadUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadUpdate} has null data`);}
+                            break;
+                            // THREAD_LIST_SYNC
+                            case Events.threadListSync:
+                                gatewayData ? this.emit(Events.threadListSync, gatewayData) : () => {throw new Error(`Event ${Events.threadListSync} has null data`);}
+                            break;
+                            // THREAD_MEMBER_UPDATE
+                            case Events.threadMemberUpdate:
+                                gatewayData ? this.emit(Events.threadMemberUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMemberUpdate} has null data`);}
+                            break;
+                            // THREAD_MEMBERS_UPDATE
+                            case Events.threadMembersUpdate:
+                                gatewayData ? this.emit(Events.threadMembersUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMembersUpdate} has null data`);}
                             break;
                         }
                         break;
