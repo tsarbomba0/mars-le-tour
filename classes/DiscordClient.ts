@@ -3,6 +3,9 @@ import { Events } from '../enums/Events'
 import { discordPayload, discordPayloadData } from "../types/discordPayload";
 import { User } from "../types/User";
 import WebSocket from "ws";
+import { Guild } from "../types/Guild";
+import { GuildMember } from "../types/GuildMember";
+
 
 
 
@@ -17,7 +20,7 @@ export class DiscordClient extends EventEmitter {
     private heartbeatInterval: number;
     private resumeCodes: Array<number> = [4000, 4001, 4002, 4003, 4005, 4007, 4008, 4009];
 
-    guilds: Map<string, null|boolean|string|number|Array<string>|Object>;
+    guilds: Map<string, Guild>;
     user: User;
     username: string;
     ready: boolean = false;
@@ -63,10 +66,6 @@ export class DiscordClient extends EventEmitter {
                 switch(jsonMessage.op){
                     case 0: // OPCODE 0 -> dispatch event
                         switch(jsonMessage.t){
-                            // MESSAGE_CREATE
-                            case Events.messageCreate: this.emit("messageCreate", jsonMessage.d); 
-                            break; 
-
                             // READY => this case DOESN'T emit the event, the GUILD_CREATE case does under a special condition
                             case Events.ready: if(gatewayData){
                                 [this.user, this.sessionId, this.resumeUrl, this.launchExpectedGuilds] = 
@@ -75,31 +74,92 @@ export class DiscordClient extends EventEmitter {
                             };
                             break;
 
+                            /*
+                            Guild events
+                            */
                             // GUILD_CREATE => emits ready when the amount of unavailable guilds is equal to the amount of guilds in the map
                             case Events.guildCreate: 
                                 if(gatewayData){
-                                    this.guilds.set(gatewayData.id, gatewayData)
+                                    this.guilds.set(gatewayData.id, (gatewayData as Guild))
                                     if(!this.ready){
                                         this.launchActualGuilds += 1
                                         if(this.launchActualGuilds === this.launchExpectedGuilds){
-                                            this.emit("ready")
+                                            this.emit("ready", (gatewayData as Guild))
                                             this.ready = true
                                         }
                                     }
                                 }
                             break;
-                            
                             // GUILD_DELETE
                             case Events.guildDelete:
                                 gatewayData ? this.guilds.delete(gatewayData.id) : () => {throw new Error(`Event ${Events.guildDelete} has null data`);}
+                                this.emit(Events.guildDelete)
                             break;
-                            
                             // GUILD_UPDATE
                             case Events.guildUpdate: 
-                                gatewayData ? this.guilds.set(gatewayData.id, gatewayData) : () => {throw new Error(`Event ${Events.guildUpdate} has null data`);}
-                            break;     
-                                
+                                gatewayData ? true : () => {throw new Error(`Event ${Events.guildUpdate} has null data`);}
+                                let oldGuild = this.guilds.get(gatewayData!.id)!
+                                Object.keys(gatewayData!).map((key) => {
+                                    this.guilds.get(gatewayData!.id)![key] = gatewayData![key]
+                                })
+                                this.emit(Events.guildUpdate)
+                            break;   
+                            // GUILD_MEMBER_ADD
+                            case Events.guildMemberAdd: 
+                                gatewayData ? true : () => {throw new Error(`Event ${Events.guildMemberAdd} has null data`);}
+                                Object.keys(gatewayData!).map((key) => {
+                                    this.guilds.get(gatewayData!.id)!.members.push((gatewayData! as GuildMember)) 
+                                })
+                                this.emit(Events.guildMemberAdd)
+                            break; 
                             
+                            /*
+                            Interaction events
+                            */
+                            // INTERACTION_CREATE
+                            case Events.interactionCreate:
+                                gatewayData ? this.emit(Events.interactionCreate, gatewayData) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
+                            break;
+
+                            /*
+                            Message events
+                            */
+                            // MESSAGE_CREATE
+                            case Events.messageCreate: 
+                                gatewayData ? this.emit(Events.messageCreate, gatewayData) :  () => {throw new Error(`Event ${Events.messageCreate} has null data`);}
+                            break;
+                            // MESSAGE_DELETE
+                            case Events.messageDelete: 
+                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDelete} has null data`);}
+                            break;
+                            // MESSAGE_UPDATE
+                            case Events.messageUpdate: 
+                                gatewayData ? this.emit(Events.messageUpdate, gatewayData) :  () => {throw new Error(`Event ${Events.messageUpdate} has null data`);}
+                            break;
+                            // MESSAGE_DELETE_BULK
+                            case Events.messageDeleteBulk: 
+                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDeleteBulk} has null data`);}
+                            break;
+
+                            /*
+                            Message reaction events
+                            */
+                            // MESSAGE_REACTION_ADD
+                            case Events.messageReactionAdd:
+                                gatewayData ? this.emit(Events.messageReactionAdd, gatewayData) : () => {throw new Error(`Event ${Events.messageReactionAdd} has null data`);}
+                            break;
+                            // MESSAGE_REACTION_REMOVE
+                            case Events.messageReactionRemove:
+                                gatewayData ? this.emit(Events.messageReactionRemove, gatewayData) : () => {throw new Error(`Event ${Events.messageReactionRemove} has null data`);}
+                            break;
+                            // MESSAGE_REACTION_REMOVE_ALL
+                            case Events.messageReactionRemoveAll:
+                                gatewayData ? this.emit(Events.messageReactionRemoveAll, gatewayData) : () => {throw new Error(`Event ${Events.messageReactionRemoveAll} has null data`);}
+                            break;
+                            // MESSAGE_REACTION_REMOVE_EMOJI
+                            case Events.messageReactionRemoveEmoji:
+                                gatewayData ? this.emit(Events.messageReactionRemoveEmoji, gatewayData) : () => {throw new Error(`Event ${Events.messageReactionRemoveEmoji} has null data`);}
+                            break;
                         }
                         break;
                     case 10: // OPCODE 10
