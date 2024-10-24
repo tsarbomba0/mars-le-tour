@@ -1,4 +1,4 @@
-import { OptionChoices } from "../types/choices";
+import { OptionChoices } from "../types/Choices";
 import { OptionType } from "../enums/OptionType";
 import { Options } from "../types/Options";
 

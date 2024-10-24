@@ -1,4 +1,4 @@
-import { OptionChoices } from "./choices";
+import { OptionChoices } from "./Choices";
 import { Localization } from "./Localizations";
 
 export type Options = {

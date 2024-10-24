@@ -1,5 +1,5 @@
 import { OptionType } from "../enums/OptionType.ts";
-import { OptionChoices } from "../types/choices.ts";
+import { OptionChoices } from "../types/Choices.ts";
 import { Localization } from "../types/Localizations.ts";
 import { Options } from "../types/Options.ts";
 import { integerOption } from "./Option.ts";

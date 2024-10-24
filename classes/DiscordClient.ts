@@ -5,8 +5,8 @@ import { User } from "../types/User";
 import WebSocket from "ws";
 import { Guild } from "../types/Guild";
 import { GuildMember } from "../types/GuildMember";
-import { InteractionOptions } from "../types/Interaction";
-
+import { InteractionOptions } from "../types/InteractionOptions";
+import { Interaction } from "./Interaction";
 
 
 
@@ -119,7 +119,7 @@ export class DiscordClient extends EventEmitter {
                             */
                             // INTERACTION_CREATE
                             case Events.interactionCreate:
-                                gatewayData ? this.emit(Events.interactionCreate, (gatewayData as InteractionOptions)) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
+                                gatewayData ? this.emit(Events.interactionCreate, new Interaction((gatewayData as InteractionOptions))) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
                             break;
 
                             /*

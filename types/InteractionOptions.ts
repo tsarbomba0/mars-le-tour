@@ -2,7 +2,7 @@ import { Guild } from "./Guild";
 import { GuildMember } from "./GuildMember";
 import { User } from "./User";
 
-export type Interaction = {
+export type InteractionOptions = {
     id: string; 
     application_id: string;
     type: number;

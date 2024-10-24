@@ -1,7 +1,7 @@
 
 import { Guild } from "./Guild";
 import { GuildMember } from "./GuildMember";
-import { InteractionOptions } from "./Interaction";
+import { InteractionOptions } from "./InteractionOptions";
 import { User } from "./User";
 
 export interface discordPayloadData extends Object, Omit<Guild, 'application_id'>, User, Omit<GuildMember, 'banner'|'avatar'|'avatar_decoration_data'>, InteractionOptions {
