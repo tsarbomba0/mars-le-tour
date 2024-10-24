@@ -1,10 +1,12 @@
 import { DiscordClient } from './classes/DiscordClient'
-import { token } from './constants'
+import { integerOption, stringOption } from './classes/Option'
+import { SlashCommand } from './classes/SlashCommand'
+import { token, token2 } from './constants'
 import { Guild } from './types/Guild'
-const client = new DiscordClient(token)
+const client = new DiscordClient(token2)
 
 client.on('messageCreate', (msg) => {
-    if(msg.author.id == '1288517603337179166'){
+    if(msg.author.id == client.user.id){
         return;
     }
     console.log(client.guilds)
@@ -17,10 +19,23 @@ client.on('ready', (a) => {
     let newid = {
         id: 2
     }
-    if(guild1){
-        console.log(Object.entries(guild1))
-        let asd = Object.entries(guild1).reduce((obj, [k,v]) => Object.assign(obj, {[k]:newid[v]}, {}))
-        console.log(asd)
+    let test: any = {
+        data: new SlashCommand()
+                .addName("Test")
+                .addDescription("testing")
+                .addOption(
+                    new integerOption('test', 'testing')
+                    .addSubcommand(new integerOption('test2', 'test2'))
+                    .finalize()
+                )
+                .addOption(
+                    new stringOption('test123', 'testing123')
+                    .addSubcommand(new stringOption('teststring', 'teststring123'))
+                    .finalize()
+                )
+                .setChannelTypes([0,1,2,3])
+                .finalize()
+
     }
-    
+    console.log(test.data)
 })
