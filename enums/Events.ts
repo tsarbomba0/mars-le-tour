@@ -50,7 +50,7 @@ export enum Events {
     stageInstanceDelete = "STAGE_INSTANCE_DELETE",
 
     // Interaction event
-    interactionCreate = "INTERCTION_CREATE",
+    interactionCreate = "INTERACTION_CREATE",
 
     // Typing event
     typingStart = "TYPING_START",

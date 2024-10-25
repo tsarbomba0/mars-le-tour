@@ -1,17 +1,48 @@
 import { InteractionOptions } from "../types/InteractionOptions";
-
+import { GuildMember } from "../types/GuildMember";
+import { Guild } from "../types/Guild";
+import { User } from "../types/User";
+import { Options } from "../types/Options";
 export class Interaction{
     // Properties
-    id: string;
-    token: string;
-    interactionURI: string;
-    webhookURI: string;
+    private token: string; // Token
+    id: string; // ID of the interaction
+    name: string; // Name of executed Interaction
+    options: Map<string, Object> ; // Option map
+    guild?: Guild // Guild object
+    guild_id: string; // Guild id (if executed in a guild)
+    channel?: object; // channel obj
+    channel_id?: string; // Channel id (if executed in a guild)
+    member?: GuildMember | null; // Present if command executed in a guild
+    user?: User | null// Present if command executed in dms
+    app_permissions: string; // Permissions
+    locale?: string; // Locale
+    guild_locale: string; // Guild Locale
+    entitlements: Array<object> //entitlement objects
 
     constructor(options: InteractionOptions){
         this.id = options.id
         this.token = options.token
-        this.interactionURI = `https://discord.com/api/v10/interactions/${this.id}/${this.token}`
-        this.webhookURI = `https://discord.com/api/v10/webhooks/${this.id}/${this.token}`
+        this.name = options.data ? options.data.name : "PLACEHOLDERNAME"
+        this.user = options.user
+        this.guild = options.guild
+        this.guild_id = options.guild_id
+        this.channel = options.channel
+        this.channel_id = options.channel_id
+        this.member = options.member
+        this.locale = options.locale
+        this.guild_locale = options.guild_locale
+        this.entitlements = options.entitlements
+
+        // Option map
+        this.options = new Map()
+        options.data?.options.forEach((option) => {
+            let values: Object = {
+                value: option.value
+            }
+            if(option.options)values['options'] = option.options
+            this.options.set(option.name, values)
+        })
     }
 
     private headerObject = {
@@ -19,8 +50,11 @@ export class Interaction{
         'Content-Type': 'application/json',
     }
     
+    // URIs
+    private interactionURI = `https://discord.com/api/v10/interactions`
+    private webhookURI = `https://discord.com/api/v10/webhooks`
 
-    // methods TODO: Test
+    
     /*
     Replies to the interaction!
     */
@@ -40,7 +74,7 @@ export class Interaction{
     Defers the response to the interaction, let's you respond after a longer time than 3 seconds.
     */
     defer(){
-        fetch(`${this.interactionURI}/callback`, {
+        fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -50,13 +84,12 @@ export class Interaction{
             ,
         })
     }
-    
 
     /*
     Edits the original response to the interaction.
     */
     edit(content: Object){
-        fetch(`${this.interactionURI}/messages/@original`, {
+        fetch(`${this.interactionURI}/${this.id}/${this.token}/messages/@original`, {
             method: 'PATCH',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -71,7 +104,7 @@ export class Interaction{
     Sends a followup message.
     */
     send(content: Object){
-        let resp = fetch(`${this.interactionURI}/messages/@original`, {
+        let resp = fetch(`${this.interactionURI}/${this.id}/${this.token}/messages/@original`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -87,7 +120,7 @@ export class Interaction{
     ACK ping.
     */
     ping(){
-        fetch(this.interactionURI, {
+        fetch(`${this.interactionURI}/${this.id}/${this.token}`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({

@@ -4,6 +4,7 @@ import { Localization } from "./Localizations";
 export type Options = {
     type: number;
     name: string,
+    value: string|boolean|number
     name_localizations?: Localization
     description: string,
     description_localizations?: Localization
