@@ -35,7 +35,7 @@ export class DiscordClient extends EventEmitter {
         this.guilds = new Map()
 
 
-        // Closed connection (will attempt to reconnect on status codes: )
+        // Closed connection (will attempt to reconnect on status codes in resumeCodes)
         this.gatewayApiConnection.on('close', (code) => {
             console.log(`Connection closed! Code: ${code}`)
             if(this.resumeCodes.includes(code)){
@@ -53,7 +53,7 @@ export class DiscordClient extends EventEmitter {
         })
 
         this.gatewayApiConnection.on('error', (err) =>{
-            console.log(err)
+            console.log(err) // This should not fire!
         })
 
         // on open
@@ -122,7 +122,7 @@ export class DiscordClient extends EventEmitter {
                                 gatewayData ? this.emit(Events.interactionCreate, new Interaction((gatewayData as InteractionOptions))) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
                             break;
 
-                            /*
+                            /* 
                             Message events TODO: Message object 
                             */
                             // MESSAGE_CREATE
@@ -244,6 +244,5 @@ export class DiscordClient extends EventEmitter {
                 }),
             }
         )
-        console.log(resp)
     }
 }   

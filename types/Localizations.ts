@@ -1,4 +1,4 @@
-export type Localization {
+export type Localization = {
     id?: string // Indonesian
     da?: string // Danish
     de?: string	 // German

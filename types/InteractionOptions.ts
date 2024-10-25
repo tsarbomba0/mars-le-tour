@@ -1,6 +1,6 @@
 import { Guild } from "./Guild";
 import { GuildMember } from "./GuildMember";
-import { Options } from "./Options";
+import { InteractionEventOptions, Options } from "./Options";
 import { User } from "./User";
 
 export type InteractionOptions = {
@@ -28,7 +28,7 @@ export type InteractionOptions = {
 
 export type InteractionData = {
     type: number
-    options: Array<Options>
+    options: Array<InteractionEventOptions>
     name: string
     id: string
     guild_id: string
