@@ -119,7 +119,7 @@ export class DiscordClient extends EventEmitter {
                             */
                             // INTERACTION_CREATE
                             case Events.interactionCreate:
-                                gatewayData ? this.emit(Events.interactionCreate, new Interaction((gatewayData as InteractionOptions))) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
+                                gatewayData ? this.emit(Events.interactionCreate, new Interaction((gatewayData as InteractionOptions), this)) : () => {throw new Error(`Event ${Events.interactionCreate} has null data`);}
                             break;
 
                             /* 

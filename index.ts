@@ -5,6 +5,7 @@ import { SlashCommand } from './classes/SlashCommand'
 import { token, token2 } from './constants'
 import { Guild } from './types/Guild'
 import { Interaction } from './classes/Interaction'
+import { Embed } from './classes/Embed'
 const client = new DiscordClient(token2)
 
 client.on('messageCreate', (msg) => {
@@ -19,11 +20,31 @@ client.on('ready', (a) => {
     console.log(`${client.user.username} is ready!`)
 })
 
-client.on(Events.interactionCreate, (interaction: Interaction) => {
+client.on(Events.interactionCreate, async (interaction: Interaction) => {
     console.log("A")
-    console.log(interaction)
-    interaction.defer()
-    setTimeout(() => {
-        interaction.reply({ content: "hah!", ephemeral: true})
-    }, 5000)
+    await interaction.defer()
+    const embed = new Embed()
+        .setTitle("Test title!")
+        .setDescription('Test embed!')
+        .addFields({ name: "test", value: "test", inline: true })
+        .setAuthor({ name: "Hii!"})
+        .setImage({ url: 'https://cataas.com/cat'})
+        .setThumbnail({ url: 'https://cataas.com/cat'})
+        .setColor('#5865F2')
+        .setTimestamp()
+        .finalize()
+    console.log(embed)
+    
+    setTimeout(async () => {
+        await interaction.editResponse({ embeds: [embed] })
+    }, 1)
+    
+    
 })
+
+
+/*
+[Object ...]
+.setColor('#000000')
+        .setAuthor({ name: 'mars-le-tour'})
+*/

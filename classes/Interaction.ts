@@ -3,6 +3,7 @@ import { GuildMember } from "../types/GuildMember";
 import { Guild } from "../types/Guild";
 import { User } from "../types/User";
 import { Options } from "../types/Options";
+import { DiscordClient } from "./DiscordClient";
 export class Interaction{
     // Properties
     private token: string; // Token
@@ -19,8 +20,9 @@ export class Interaction{
     locale?: string; // Locale
     guild_locale: string; // Guild Locale
     entitlements: Array<object> //entitlement objects
+    client: DiscordClient
 
-    constructor(options: InteractionOptions){
+    constructor(options: InteractionOptions, client: DiscordClient){
         this.id = options.id
         this.token = options.token
         this.name = options.data ? options.data.name : "PLACEHOLDERNAME"
@@ -33,7 +35,7 @@ export class Interaction{
         this.locale = options.locale
         this.guild_locale = options.guild_locale
         this.entitlements = options.entitlements
-
+        this.client = client
         // Option map
         this.options = new Map()
         options.data?.options.forEach((option) => {
@@ -58,8 +60,8 @@ export class Interaction{
     /*
     Replies to the interaction!
     */
-    reply(content: Object){
-        fetch(`${this.interactionURI}/callback`, {
+    async reply(content: Object){ 
+        const resp = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -68,12 +70,15 @@ export class Interaction{
             })
             },
         )
+
+        let res = await resp.json()
+        console.log(res)
     }
     
     /*
     Defers the response to the interaction, let's you respond after a longer time than 3 seconds.
     */
-    defer(){
+    async defer(){
         fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
@@ -88,27 +93,23 @@ export class Interaction{
     /*
     Edits the original response to the interaction.
     */
-    edit(content: Object){
-        fetch(`${this.interactionURI}/${this.id}/${this.token}/messages/@original`, {
+    async editResponse(content: Object){
+        await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
             method: 'PATCH',
             headers: this.headerObject,
-            body: JSON.stringify({
-                type: 5,
-                data: content
-            })
-            ,
+            body: JSON.stringify(content)
         })
     }
 
     /*
     Sends a followup message.
     */
-    send(content: Object){
-        let resp = fetch(`${this.interactionURI}/${this.id}/${this.token}/messages/@original`, {
+    async send(content: Object){
+        let resp = fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
-                type: 5,
+                type: 4,
                 data: content
             })
             ,
@@ -119,7 +120,7 @@ export class Interaction{
     /*
     ACK ping.
     */
-    ping(){
+    async ping(){
         fetch(`${this.interactionURI}/${this.id}/${this.token}`, {
             method: 'POST',
             headers: this.headerObject,
@@ -134,7 +135,7 @@ export class Interaction{
     /*
     Deletes the original message.
     */
-    delete(){
+    async delete(){
         fetch(`${this.interactionURI}/messages/@original`, {
             method: 'DELETE',
             headers: this.headerObject,
