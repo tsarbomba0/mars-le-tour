@@ -8,6 +8,7 @@ import { Interaction } from './classes/interactions/Interaction'
 import { Embed } from './classes/Embed'
 import { Button } from './classes/Components/Button'
 import { ActionRow } from './classes/Components/ActionRow'
+import { TextInput } from './classes/components/TextInput'
 const client = new DiscordClient(token2)
 
 client.on('messageCreate', (msg) => {
@@ -23,23 +24,18 @@ client.on('ready', (a) => {
 })
 
 client.on(Events.interactionCreate, async (interaction: Interaction) => {
+    const modal = new ActionRow([
+        new TextInput()
+        .setCustomID("Test")
+        .setLabel("Modal!")
+        .setPlaceholder("Placeholder!")
+        .setStyle(1)
+        .isRequired()
+    ]) 
+
     if(interaction.name = "test"){
-        await interaction.reply({ content: "Death", components: [new ActionRow([new Button()
-            .setLabel("Ahahaha!")
-            .setCustomID("hehehe!")
-            .setStyle(1)
-            .finalize()
-        ]).finalize()]})
-        setTimeout(async () => {
-            console.log("Aha?")
-            await interaction.delete()
-        }, 5000)
+        console.log(JSON.stringify(modal))
+        await interaction.replyModal({ title: "Modal.", custom_id: "Modal", components: [modal]})
     }
+
 })
-
-
-/*
-[Object ...]
-.setColor('#000000')
-        .setAuthor({ name: 'mars-le-tour'})
-*/

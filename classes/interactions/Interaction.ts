@@ -128,7 +128,6 @@ export class Interaction{
         })
         if((await fetchResponse).ok !== true){
             let respJson = await fetchResponse.json()
-            console.log(respJson.errors)
             throw new Error(respJson.message)
         }
     }
@@ -172,6 +171,27 @@ export class Interaction{
             console.log(respJson.errors)
             throw new Error(respJson.message)
         }
+    }
+    /**
+     * Replies with a Modal object.
+     * 
+     * 
+     */
+    async replyModal(content: Object){
+        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
+            method: 'POST',
+            headers: this.headerObject,
+            body: JSON.stringify({
+                type: 9,
+                data: content
+            })
+        })
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors.data.components[0].components[0]._errors)
+            throw new Error(JSON.stringify(respJson))
+        }
+
     }
 
 }
