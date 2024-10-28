@@ -6,8 +6,12 @@
 index.ts contains a really small test bot.
 
 ## Current functionality 
-Currently the library offers a guild Map object, several events related to guilds, interactions and messages.
-Resuming in case of a terminated connection is also supported.
+- Gateway API (TODO: Voice API)
+- Interactions
+- Modal interactions
+- Most events
+- Resuming
+- Embeds
 
 ## Goals
 Full functionality

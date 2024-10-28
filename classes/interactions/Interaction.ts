@@ -3,6 +3,7 @@ import { GuildMember } from "../../types/Guild/GuildMember";
 import { Guild } from "../../types/Guild/Guild";
 import { User } from "../../types/Guild/User";
 import { DiscordClient } from "../DiscordClient";
+import { ModalOptions } from "../../types/Options/ModalOptions";
 export class Interaction{
     // Properties
     private token: string; // Token
@@ -177,7 +178,7 @@ export class Interaction{
      * 
      * 
      */
-    async replyModal(content: Object){
+    async replyModal(content: ModalOptions){
         const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
