@@ -1,7 +1,7 @@
-import { Guild } from "./Guild";
+import { Guild } from "../Guild/Guild";
 import { GuildMember } from "./GuildMember";
-import { InteractionEventOptions, Options } from "./Options";
-import { User } from "./User";
+import { InteractionEventOptions, Options } from "../Options";
+import { User } from "../Guild/User";
 
 export type InteractionOptions = {
     id: string; 

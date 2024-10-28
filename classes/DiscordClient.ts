@@ -1,12 +1,12 @@
 import { EventEmitter } from "stream";
 import { Events } from '../enums/Events'
-import { discordPayload, discordPayloadData } from "../types/discordPayload";
-import { User } from "../types/User";
+import { discordPayload, discordPayloadData } from "../types/Discord/discordPayload";
+import { User } from "../types/Guild/User";
 import WebSocket from "ws";
-import { Guild } from "../types/Guild";
-import { GuildMember } from "../types/GuildMember";
-import { InteractionOptions } from "../types/InteractionOptions";
-import { Interaction } from "./Interaction";
+import { Guild } from "../types/Guild/Guild";
+import { GuildMember } from "../types/Guild/GuildMember";
+import { InteractionOptions } from "../types/Options/InteractionOptions";
+import { Interaction } from "./interactions/Interaction";
 
 
 

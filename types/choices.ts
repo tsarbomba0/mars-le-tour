@@ -1,4 +1,4 @@
-import { Localization } from "./Localizations";
+import { Localization } from "./Media/Localizations";
 
 export type OptionChoices = {
     name: string,

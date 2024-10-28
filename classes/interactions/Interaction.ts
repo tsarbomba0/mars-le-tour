@@ -1,9 +1,8 @@
-import { InteractionOptions } from "../types/InteractionOptions";
-import { GuildMember } from "../types/GuildMember";
-import { Guild } from "../types/Guild";
-import { User } from "../types/User";
-import { Options } from "../types/Options";
-import { DiscordClient } from "./DiscordClient";
+import { InteractionOptions } from "../../types/Options/InteractionOptions";
+import { GuildMember } from "../../types/Guild/GuildMember";
+import { Guild } from "../../types/Guild/Guild";
+import { User } from "../../types/Guild/User";
+import { DiscordClient } from "../DiscordClient";
 export class Interaction{
     // Properties
     private token: string; // Token
@@ -61,7 +60,8 @@ export class Interaction{
     Replies to the interaction!
     */
     async reply(content: Object){ 
-        const resp = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
+        console.log(content)
+        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -71,15 +71,18 @@ export class Interaction{
             },
         )
 
-        let res = await resp.json()
-        console.log(res)
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors.data.components[0]._errors)
+            throw new Error(respJson.message)
+        }
     }
     
     /*
     Defers the response to the interaction, let's you respond after a longer time than 3 seconds.
     */
     async defer(){
-        fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
+        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -88,40 +91,53 @@ export class Interaction{
             })
             ,
         })
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors)
+            throw new Error(respJson.message)
+        }
     }
 
     /*
     Edits the original response to the interaction.
     */
     async editResponse(content: Object){
-        await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
+        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
             method: 'PATCH',
             headers: this.headerObject,
             body: JSON.stringify(content)
         })
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors)
+            throw new Error(respJson.message)
+        }
     }
 
     /*
     Sends a followup message.
     */
     async send(content: Object){
-        let resp = fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
+        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
                 type: 4,
                 data: content
             })
-            ,
         })
-        return resp;
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors)
+            throw new Error(respJson.message)
+        }
     }
 
-    /*
+    /*  
     ACK ping.
     */
     async ping(){
-        fetch(`${this.interactionURI}/${this.id}/${this.token}`, {
+        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}`, {
             method: 'POST',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -130,13 +146,19 @@ export class Interaction{
             })
             },
         )
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors)
+            throw new Error(respJson.message)
+        }
+        
     }
 
     /*
     Deletes the original message.
     */
     async delete(){
-        fetch(`${this.interactionURI}/messages/@original`, {
+        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
             method: 'DELETE',
             headers: this.headerObject,
             body: JSON.stringify({
@@ -145,6 +167,11 @@ export class Interaction{
             })
             },
         )
+        if((await fetchResponse).ok !== true){
+            let respJson = await fetchResponse.json()
+            console.log(respJson.errors)
+            throw new Error(respJson.message)
+        }
     }
 
 }

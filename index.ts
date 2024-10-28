@@ -1,11 +1,13 @@
 import { Events } from './enums/Events'
 import { DiscordClient } from './classes/DiscordClient'
 import { integerOption, stringOption } from './classes/Option'
-import { SlashCommand } from './classes/SlashCommand'
+import { SlashCommand } from './classes/interactions/SlashCommand'
 import { token, token2 } from './constants'
-import { Guild } from './types/Guild'
-import { Interaction } from './classes/Interaction'
+import { Guild } from './types/Guild/Guild'
+import { Interaction } from './classes/interactions/Interaction'
 import { Embed } from './classes/Embed'
+import { Button } from './classes/Components/Button'
+import { ActionRow } from './classes/Components/ActionRow'
 const client = new DiscordClient(token2)
 
 client.on('messageCreate', (msg) => {
@@ -21,25 +23,18 @@ client.on('ready', (a) => {
 })
 
 client.on(Events.interactionCreate, async (interaction: Interaction) => {
-    console.log("A")
-    await interaction.defer()
-    const embed = new Embed()
-        .setTitle("Test title!")
-        .setDescription('Test embed!')
-        .addFields({ name: "test", value: "test", inline: true })
-        .setAuthor({ name: "Hii!"})
-        .setImage({ url: 'https://cataas.com/cat'})
-        .setThumbnail({ url: 'https://cataas.com/cat'})
-        .setColor('#5865F2')
-        .setTimestamp()
-        .finalize()
-    console.log(embed)
-    
-    setTimeout(async () => {
-        await interaction.editResponse({ embeds: [embed] })
-    }, 1)
-    
-    
+    if(interaction.name = "test"){
+        await interaction.reply({ content: "Death", components: [new ActionRow([new Button()
+            .setLabel("Ahahaha!")
+            .setCustomID("hehehe!")
+            .setStyle(1)
+            .finalize()
+        ]).finalize()]})
+        setTimeout(async () => {
+            console.log("Aha?")
+            await interaction.delete()
+        }, 5000)
+    }
 })
 
 

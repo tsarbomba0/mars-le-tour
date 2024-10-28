@@ -1,11 +1,11 @@
 import { cmykCodes, hexCode, rgbCodes } from "../types/ColorCodes";
-import { EmbedAuthor } from "../types/EmbedAuthor.ts";
-import { EmbedField } from "../types/EmbedField.ts";
-import { EmbedFooter } from "../types/EmbedFooter.ts";
-import { EmbedProvider } from "../types/EmbedProvider.ts";
-import { Image } from "../types/Image.ts";
-import { URL } from "../types/URL.ts";
-import { Video } from "../types/Video.ts";
+import { EmbedAuthor } from "../types/Embed/EmbedAuthor.ts";
+import { EmbedField } from "../types/Embed/EmbedField.ts";
+import { EmbedFooter } from "../types/Embed/EmbedFooter.ts";
+import { EmbedProvider } from "../types/Embed/EmbedProvider.ts";
+import { Image } from "../types/Media/Image.ts";
+import { URL } from "../types/Media/URL.ts";
+import { Video } from "../types/Media/Video.ts";
 
 const date = new Date()
 let timeVar: Date; 

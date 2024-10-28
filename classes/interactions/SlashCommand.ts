@@ -1,8 +1,8 @@
-import { EntryPointHandler } from "../enums/EntryPointHandler.ts";
-import { InstallationContext } from "../enums/InstallationContext.ts";
-import { InteractionContext } from "../enums/InteractionContext.ts";
-import { Localization } from "../types/Localizations.ts";
-import { Options } from "../types/Options.ts";
+import { EntryPointHandler } from "../../enums/EntryPointHandler.ts";
+import { InstallationContext } from "../../enums/InstallationContext.ts";
+import { InteractionContext } from "../../enums/InteractionContext.ts";
+import { Localization } from "../../types/Media/Localizations.ts";
+import { Options } from "../../types/Options/Options.ts";
 
 
 
