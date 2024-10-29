@@ -1,12 +1,18 @@
 import { InteractionOptions } from "../../types/Options/InteractionOptions";
-import { GuildMember } from "../../types/Guild/GuildMember";
-import { Guild } from "../../types/Guild/Guild";
-import { User } from "../../types/Guild/User";
+import { GuildMember } from "../Guild/GuildMember";
+import { Guild } from "../Guild/Guild";
+import { User } from "../Guild/User";
 import { DiscordClient } from "../DiscordClient";
 import { ModalOptions } from "../../types/Options/ModalOptions";
-export class Interaction{
+import { deleteReply, editReply, followupSend, ping, restReply } from "../../rest/InteractionResponse";
+import { interactionCallback } from "../../enums/InteractionCallback";
+
+/**
+ * Class for the Discord Interaction object.
+ */
+export class Interaction {
     // Properties
-    private token: string; // Token
+    readonly token: string; // Token
     id: string; // ID of the interaction
     name: string; // Name of executed Interaction
     options: Map<string, Object> ; // Option map
@@ -47,19 +53,20 @@ export class Interaction{
         })
     }
 
-    private headerObject = {
+    readonly headerObject = {
         'User-Agent': 'DiscordBot (mars-le-tour, 1.0.0)',
         'Content-Type': 'application/json',
     }
     
     // URIs
-    private interactionURI = `https://discord.com/api/v10/interactions`
-    private webhookURI = `https://discord.com/api/v10/webhooks`
+    readonly interactionURI = `https://discord.com/api/v10/interactions`
+    readonly webhookURI = `https://discord.com/api/v10/webhooks`
 
     
-    /*
-    Replies to the interaction!
-    */
+    /**
+     * Replies to the Interaction.
+     * @param content 
+     */
     async reply(content: Object){ 
         console.log(content)
         const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
@@ -79,9 +86,9 @@ export class Interaction{
         }
     }
     
-    /*
-    Defers the response to the interaction, let's you respond after a longer time than 3 seconds.
-    */
+    /**
+     * Defers the response for the Interaction.
+     */
     async defer(){
         const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
             method: 'POST',
@@ -99,100 +106,59 @@ export class Interaction{
         }
     }
 
-    /*
-    Edits the original response to the interaction.
-    */
+    /**
+     * Edits the original response for the Interaction
+     * @param content 
+     */
     async editResponse(content: Object){
-        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
-            method: 'PATCH',
-            headers: this.headerObject,
-            body: JSON.stringify(content)
-        })
+        const fetchResponse = await editReply(content, this)
         if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors)
-            throw new Error(respJson.message)
+            throw new Error(fetchResponse.message)
         }
     }
 
-    /*
-    Sends a followup message.
-    */
+    /**
+     * Sends a followup message for the Interaction.
+     * @param content 
+     * @returns void
+     */
     async send(content: Object){
-        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
-            method: 'POST',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 4,
-                data: content
-            })
-        })
+        const fetchResponse = await followupSend(content, this)
         if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            throw new Error(respJson.message)
+            throw new Error(fetchResponse.message)
         }
     }
 
-    /*  
-    ACK ping.
-    */
+    /**
+     * Sends a ACK ping as the reply
+     */
     async ping(){
-        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}`, {
-            method: 'POST',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 1,
-                data: null
-            })
-            },
-        )
+        const fetchResponse = await ping(this)
         if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors)
-            throw new Error(respJson.message)
+            throw new Error(fetchResponse.message)
         }
         
     }
 
-    /*
-    Deletes the original message.
-    */
+    /**
+     * Deletes the original message
+     * @returns void
+     */
     async delete(){
-        const fetchResponse = await fetch(`${this.webhookURI}/${this.client.user.id}/${this.token}/messages/@original`, {
-            method: 'DELETE',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 1,
-                data: null
-            })
-            },
-        )
+        const fetchResponse = await deleteReply(this)
         if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors)
-            throw new Error(respJson.message)
+            throw new Error(fetchResponse.message)
         }
     }
     /**
      * Replies with a Modal object.
-     * 
-     * 
+     * @param content
+     * @returns void
      */
     async replyModal(content: ModalOptions){
-        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
-            method: 'POST',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 9,
-                data: content
-            })
-        })
+        const fetchResponse = await restReply(content, this, interactionCallback.modal)
         if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors.data.components[0].components[0]._errors)
-            throw new Error(JSON.stringify(respJson))
+            throw new Error(await fetchResponse.message)
         }
-
     }
-
 }

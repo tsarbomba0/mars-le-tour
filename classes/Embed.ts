@@ -9,6 +9,10 @@ import { Video } from "../types/Media/Video.ts";
 
 const date = new Date()
 let timeVar: Date; 
+
+/**
+ * Class for the Discord Rich Content or Embedded Content.
+ */
 export class Embed {
     // Properties
     title: string;

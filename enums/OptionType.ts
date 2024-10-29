@@ -1,3 +1,6 @@
+/**
+ * Enum containing types of possible options.
+ */
 export enum OptionType {
     subCommand = 1,
     subCommandGroup = 2,

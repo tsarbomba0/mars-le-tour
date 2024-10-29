@@ -1,3 +1,6 @@
+/**
+ * Enum containing Gateway Events.
+ */
 export enum Events {
     // ready event
     ready = "READY",

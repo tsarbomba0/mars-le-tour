@@ -1,6 +1,9 @@
 import { User } from "./User";
 
-export interface GuildMember extends Object {
+/**
+ * Class for a Guild Member
+ */
+export class GuildMember {
     user: User
     nick?: string;
     avatar?: string;
