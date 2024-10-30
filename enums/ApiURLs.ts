@@ -1,0 +1,4 @@
+export enum apiUrls {
+    interactionURI = `https://discord.com/api/v10/interactions`,
+    webhookURI = `https://discord.com/api/v10/webhooks`
+}

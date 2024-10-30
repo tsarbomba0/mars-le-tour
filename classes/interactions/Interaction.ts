@@ -4,44 +4,61 @@ import { Guild } from "../Guild/Guild";
 import { User } from "../Guild/User";
 import { DiscordClient } from "../DiscordClient";
 import { ModalOptions } from "../../types/Options/ModalOptions";
-import { deleteReply, editReply, followupSend, ping, restReply } from "../../rest/InteractionResponse";
+import { REST } from "../../rest/REST";
 import { interactionCallback } from "../../enums/InteractionCallback";
+import { error } from "console";
 
 /**
  * Class for the Discord Interaction object.
  */
 export class Interaction {
-    // Properties
-    readonly token: string; // Token
-    id: string; // ID of the interaction
-    name: string; // Name of executed Interaction
-    options: Map<string, Object> ; // Option map
-    guild?: Guild // Guild object
-    guild_id: string; // Guild id (if executed in a guild)
-    channel?: object; // channel obj
-    channel_id?: string; // Channel id (if executed in a guild)
-    member?: GuildMember | null; // Present if command executed in a guild
-    user?: User | null// Present if command executed in dms
-    app_permissions: string; // Permissions
-    locale?: string; // Locale
-    guild_locale: string; // Guild Locale
-    entitlements: Array<object> //entitlement objects
+    /** the Interaction's Token */ 
+    readonly token: string; 
+    /** the Interaction's ID */
+    readonly id: string; // ID of the interaction.
+    /** the Interaction's Name (If not present, replaced with PLACEHOLDERNAME). */
+    readonly name: string; 
+    /** Map object for the Interaction's options. */
+    readonly options: Map<string, Object> ; 
+    /** The guild that the interaction was invoked in. */
+    readonly guild?: Guild 
+    /** ID of the Guild where the interaction was invoked. */
+    readonly guildId: string; 
+    /** Channel where the interaction was invoked. */
+    readonly channel?: object; 
+    /** ID of the channel where the interaction was invoked. */
+    readonly channelId?: string; 
+    /** GuildMember that invoked the interaction. */
+    readonly member?: GuildMember | null; 
+    /** the User that invoked the interaction. */
+    readonly user?: User | null
+    /** Permissions for applications. */
+    readonly appPermissions: string; 
+    /** The locale for the Interaction. */
+    locale?: string; 
+    /** Locale of the guild where the interaction was used. */
+    guildLocale: string; 
+    /** Entitlements. */
+    entitlements: Array<object> 
+    /** Discord Client handling the interaction. */
     client: DiscordClient
 
     constructor(options: InteractionOptions, client: DiscordClient){
+        // Properties
         this.id = options.id
         this.token = options.token
         this.name = options.data ? options.data.name : "PLACEHOLDERNAME"
         this.user = options.user
         this.guild = options.guild
-        this.guild_id = options.guild_id
+        this.guildId = options.guild_id
         this.channel = options.channel
-        this.channel_id = options.channel_id
+        this.channelId = options.channel_id
         this.member = options.member
         this.locale = options.locale
-        this.guild_locale = options.guild_locale
+        this.guildLocale = options.guild_locale
         this.entitlements = options.entitlements
         this.client = client
+
         // Option map
         this.options = new Map()
         options.data?.options.forEach((option) => {
@@ -53,112 +70,77 @@ export class Interaction {
         })
     }
 
-    readonly headerObject = {
-        'User-Agent': 'DiscordBot (mars-le-tour, 1.0.0)',
-        'Content-Type': 'application/json',
-    }
-    
-    // URIs
-    readonly interactionURI = `https://discord.com/api/v10/interactions`
-    readonly webhookURI = `https://discord.com/api/v10/webhooks`
 
-    
     /**
      * Replies to the Interaction.
-     * @param content 
+     * @param content Content of the request
+     * @returns Promise<void>
      */
-    async reply(content: Object){ 
+    async reply(content: Object): Promise<void>{ 
         console.log(content)
-        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
-            method: 'POST',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 4,
-                data: content
-            })
-            },
-        )
-
-        if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors.data.components[0]._errors)
-            throw new Error(respJson.message)
+        let response = await REST.Interaction.post(interactionCallback.channelMessageWithSource, content, this.id, this.token, "callback")
+        if((await response).ok !== true){
+            throw new Error(response.message)
         }
     }
     
     /**
      * Defers the response for the Interaction.
+     * @returns Promise<void>
      */
-    async defer(){
-        const fetchResponse = await fetch(`${this.interactionURI}/${this.id}/${this.token}/callback`, {
-            method: 'POST',
-            headers: this.headerObject,
-            body: JSON.stringify({
-                type: 5,
-                data: null
-            })
-            ,
-        })
-        if((await fetchResponse).ok !== true){
-            let respJson = await fetchResponse.json()
-            console.log(respJson.errors)
-            throw new Error(respJson.message)
-        }
+    async defer(): Promise<void> {
+        let response = await REST.Interaction.post(interactionCallback.deferredChannelMessage, null, this.id, this.token, "callback")
+        if ((await response).ok !== true)throw new Error(response.message)
     }
 
     /**
      * Edits the original response for the Interaction
-     * @param content 
+     * @param body Body for the request.
+     * @returns Promise<void>
      */
-    async editResponse(content: Object){
-        const fetchResponse = await editReply(content, this)
-        if((await fetchResponse).ok !== true){
-            throw new Error(fetchResponse.message)
-        }
+    async editResponse(body: Object): Promise<void>{
+        let response = await REST.Webhook.patch(body, this.id, `${this.token}/messages/@original`)
+        if((await response).ok !== true)throw new Error(response.message)
     }
 
     /**
      * Sends a followup message for the Interaction.
-     * @param content 
-     * @returns void
+     * @param content Content of the request
+     * @returnsPromise<void>
      */
     async send(content: Object){
-        const fetchResponse = await followupSend(content, this)
-        if((await fetchResponse).ok !== true){
-            throw new Error(fetchResponse.message)
-        }
+        let response = await REST.Webhook.post({
+            type: interactionCallback.channelMessageWithSource,
+            data: content
+        }, this.id, `${this.token}/messages/@original`)
+        if((await response).ok !== true)throw new Error(response.message)
     }
 
     /**
      * Sends a ACK ping as the reply
+     * @returns Promise<void>
      */
-    async ping(){
-        const fetchResponse = await ping(this)
-        if((await fetchResponse).ok !== true){
-            throw new Error(fetchResponse.message)
-        }
+    async ping(): Promise<void> {
+        let response = await REST.Interaction.ping(this.id, this.token)
+        if((await response).ok !== true)throw new Error(response.message)
         
     }
 
     /**
      * Deletes the original message
-     * @returns void
+     * @returns Promise<void>
      */
     async delete(){
-        const fetchResponse = await deleteReply(this)
-        if((await fetchResponse).ok !== true){
-            throw new Error(fetchResponse.message)
-        }
+        let response = await REST.Webhook.delete(this.id, `${this.token}/messages/@original`)
+        if((await response).ok !== true)throw new Error(response.message)
     }
     /**
      * Replies with a Modal object.
      * @param content
-     * @returns void
+     * @returns Promise<void>
      */
-    async replyModal(content: ModalOptions){
-        const fetchResponse = await restReply(content, this, interactionCallback.modal)
-        if((await fetchResponse).ok !== true){
-            throw new Error(await fetchResponse.message)
-        }
+    async replyModal(content: ModalOptions): Promise<void>{
+        let response = await REST.Interaction.post(interactionCallback.modal, content, this.id, this.token, 'callback')
+        if((await response).ok !== true)throw new Error(await response.message)
     }
 }

@@ -6,9 +6,9 @@ import { Role } from "./Role";
 /**
  * Class for a Discord Guild
  */
-export class Guild {
+export class Guild extends Map {
     readonly ImageUrl = "https://cdn.discordapp.com"
-    id: string; // TODO: SNOWFLAKE
+    id: string; 
     members: Array<GuildMember>;
     member_count: number;
     presences: Array<Object> // TODO: PARTIAL AND FULL PRESENCE OBJECTS
@@ -81,6 +81,8 @@ export class Guild {
                 if(this.splash === null)throw new Error("This guild has no discovery splash!")
                 return `${this.ImageUrl}/discovery-splashes/${this.id}/${this.discovery_splash}.${fileExtension}`
             break;
+            default:
+                throw new Error(`Incorrect option! Got ${type}, expected: banner, icon, splash or discoverySplash`)
         }
     }
 }
