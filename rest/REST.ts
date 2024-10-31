@@ -3,7 +3,64 @@ import { interactionCallback } from "../enums/InteractionCallback"
 import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse"
 import { headerObject } from "./Objects/header"
 
-/// messages/@original
+/**
+ * Function to get a channel by id using Discord's REST api.
+ * @param id Channel ID
+ * @returns Object
+ */
+async function getChannel(id: string): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
+        method: 'GET',
+        headers: headerObject,
+        body: null
+    })
+    return (await response.json())
+}
+/**
+ * Function to send a GET to the channel endpoint
+ * @param id Channel ID.
+ * @param body Body of the request in JSON.
+ * @param endpoint The endpoint to use.
+ * @returns Object
+ */
+async function postChannel(id: string, body: object, endpoint: string): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}/${endpoint}`, {
+        method: 'POST',
+        headers: headerObject,
+        body: JSON.stringify(body)
+    })
+    return (await response.json())
+}
+/**
+ * Function to send a DELETE to the channel endpoint
+ * @param id Channel ID.
+ * @param endpoint Endpoint to use.
+ * @returns Object
+ */
+async function deleteChannel(id: string, endpoint: string): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
+        method: 'DELETE',
+        headers: headerObject,
+        body: null
+    })
+    return (await response.json())
+}
+/**
+ * Function to get a channel by id using Discord's REST api.
+ * @param id Channel ID
+ * @returns Object
+ */
+async function putChannel(id: string): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
+        method: 'DELETE',
+        headers: headerObject,
+        body: null
+    })
+    return (await response.json())
+}
+
+
+
 /**
  * Sends a PATCH to a Discord Webhook
  * @param id ID of the Webhook
@@ -50,6 +107,30 @@ async function deleteWebhook(id: string, endpoint?: string): Promise<DiscordAPIR
         },
     )
     return (await response.json())
+}
+
+const webhookAPI = {
+    /**
+    * Sends a PATCH to a Discord Webhook
+    * @param id ID of the Webhook
+    * @param endpoint Endpoint to use (ex. <token>/)
+    * @returns Promise<DiscordAPIResponse>
+    */
+    patch: patchWebhook,
+    /**
+    * Sends a POST to a Discord Webhook
+    * @param id ID of the Webhook
+    * @param endpoint Endpoint to use (ex. <token>)
+    * @returns Promise<DiscordAPIResponse>
+    */
+    post: postWebhook,
+    /**
+    * Sends a DELETE to a Discord Webhook
+    * @param id ID of the Webhook
+    * @param endpoint Endpoint to use (ex. <token>/messages/@original)
+    * @returns Promise<DiscordAPIResponse>
+    */
+    delete: deleteWebhook,
 }
 
 /**
@@ -115,29 +196,7 @@ const interactionAPI = {
     post: postInteraction
 }
 
-const webhookAPI = {
-    /**
-    * Sends a PATCH to a Discord Webhook
-    * @param id ID of the Webhook
-    * @param endpoint Endpoint to use (ex. <token>/)
-    * @returns Promise<DiscordAPIResponse>
-    */
-    patch: patchWebhook,
-    /**
-    * Sends a POST to a Discord Webhook
-    * @param id ID of the Webhook
-    * @param endpoint Endpoint to use (ex. <token>)
-    * @returns Promise<DiscordAPIResponse>
-    */
-    post: postWebhook,
-    /**
-    * Sends a DELETE to a Discord Webhook
-    * @param id ID of the Webhook
-    * @param endpoint Endpoint to use (ex. <token>/messages/@original)
-    * @returns Promise<DiscordAPIResponse>
-    */
-    delete: deleteWebhook,
-}
+
 
 /**
  * Main body of the REST api wrapper.
