@@ -1,7 +1,10 @@
-import { OptionChoices } from "../types/Choices";
+import { OptionChoices } from "../types/Options/Choices";
 import { OptionType } from "../enums/OptionType";
-import { Options } from "../types/Options";
+import { Options } from "../types/Options/Options";
 
+/**
+ * Class for a integer option in a Slash Command
+ */
 export class integerOption {
     optionObject: Options 
     constructor (name: string, description: string, ifRequired?: boolean, choices?: Array<OptionChoices>){
@@ -31,6 +34,9 @@ export class integerOption {
     }
 }
 
+/**
+ * Class for a string option in a Slash Command
+ */
 export class stringOption {
     optionObject: Options 
     constructor (name: string, description: string, ifRequired?: boolean, choices?: Array<OptionChoices>){
@@ -60,6 +66,9 @@ export class stringOption {
     }
 }
 
+/**
+ * Class for a boolean option in a Slash Command
+ */
 export class booleanOption {
     optionObject: Options 
     constructor (name: string, description: string, ifRequired?: boolean, choices?: Array<OptionChoices>){

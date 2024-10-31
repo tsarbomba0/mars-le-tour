@@ -8,13 +8,14 @@ import { Embed } from './classes/Embed'
 import { Button } from './classes/Components/Button'
 import { ActionRow } from './classes/Components/ActionRow'
 import { TextInput } from './classes/components/TextInput'
+import { Message } from './classes/Message'
 const client = new DiscordClient(token2)
 
-client.on(Events.messageCreate, (msg) => {
+client.on(Events.messageCreate, (msg: Message) => {
     if(msg.author.id == client.user.id){
         return;
     }
-    console.log(client.guilds)
+    console.log(msg)
 })
  
 client.on('ready', (a) => {

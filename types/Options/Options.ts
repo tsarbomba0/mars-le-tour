@@ -1,5 +1,5 @@
 import { OptionChoices } from "./Choices";
-import { Localization } from "./Media/Localizations";
+import { Localization } from "../Media/Localizations";
 
 export type Options = {
     type: number;

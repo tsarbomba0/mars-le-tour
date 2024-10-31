@@ -8,6 +8,7 @@ import { GuildMember } from "./Guild/GuildMember";
 import { InteractionOptions } from "../types/Options/InteractionOptions";
 import { Interaction } from "./interactions/Interaction";
 import { discordGuildOptions } from "../types/Discord/discordGuildOptions";
+import { Message } from "./Message";
 
 
 
@@ -82,12 +83,12 @@ export class DiscordClient extends EventEmitter {
                             // GUILD_CREATE => emits ready when the amount of unavailable guilds is equal to the amount of guilds in the map
                             case Events.guildCreate: 
                                 if(gatewayData){
-                                    console.log(gatewayData)
-                                    this.guilds.set(gatewayData.id, new Guild((gatewayData as discordGuildOptions)))
+                                    let newGuild = new Guild((gatewayData as discordGuildOptions))
+                                    this.guilds.set(gatewayData.id, newGuild)
                                     if(!this.ready){
                                         this.launchActualGuilds += 1
                                         if(this.launchActualGuilds === this.launchExpectedGuilds){
-                                            this.emit("ready", (gatewayData as Guild))
+                                            this.emit("ready", newGuild)
                                             this.ready = true
                                         }
                                     }
@@ -125,23 +126,23 @@ export class DiscordClient extends EventEmitter {
                             break;
 
                             /* 
-                            Message events TODO: Message object 
+                            Message events 
                             */
                             // MESSAGE_CREATE
                             case Events.messageCreate: 
-                                gatewayData ? this.emit(Events.messageCreate, gatewayData) :  () => {throw new Error(`Event ${Events.messageCreate} has null data`);}
+                                gatewayData ? this.emit(Events.messageCreate, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageCreate} has null data`);}
                             break;
                             // MESSAGE_DELETE
                             case Events.messageDelete: 
-                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDelete} has null data`);}
+                                gatewayData ? this.emit(Events.messageDelete, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageDelete} has null data`);}
                             break;
                             // MESSAGE_UPDATE
                             case Events.messageUpdate: 
-                                gatewayData ? this.emit(Events.messageUpdate, gatewayData) :  () => {throw new Error(`Event ${Events.messageUpdate} has null data`);}
+                                gatewayData ? this.emit(Events.messageUpdate, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageUpdate} has null data`);}
                             break;
                             // MESSAGE_DELETE_BULK
                             case Events.messageDeleteBulk: 
-                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDeleteBulk} has null data`);}
+                                gatewayData ? this.emit(Events.messageDelete, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageDeleteBulk} has null data`);}
                             break;
 
                             /*

@@ -1,4 +1,4 @@
-import { cmykCodes, hexCode, rgbCodes } from "../types/ColorCodes";
+import { cmykCodes, hexCode, rgbCodes } from "../types/Media/ColorCodes.ts";
 import { EmbedAuthor } from "../types/Embed/EmbedAuthor.ts";
 import { EmbedField } from "../types/Embed/EmbedField.ts";
 import { EmbedFooter } from "../types/Embed/EmbedFooter.ts";

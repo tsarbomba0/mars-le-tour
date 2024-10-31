@@ -1,14 +1,18 @@
-import { DMChannel, GuildChannel, VoiceChannel } from "../../classes/Channel";
 import { GuildMember } from "../../classes/Guild/GuildMember";
 import { Role } from "../../classes/Guild/Role";
 import { Emoji } from "../Media/Emoji";
+import { discordChannel } from "./discordChannel";
 
+/**
+ * Type for the Guild properties from the Discord API.
+ * Should NOT be used outside receiving the response from the API!
+ */
 export type discordGuildOptions = {
     id: string; 
     members: Array<GuildMember>;
     member_count: number;
     presences: Array<Object> // TODO: PARTIAL AND FULL PRESENCE OBJECTS
-    channels: Map<string, DMChannel|VoiceChannel|GuildChannel> // TODO: CHANNEL OBJECT
+    channels: Array<discordChannel> // TODO: CHANNEL OBJECT
     threads: Array<Object> // ^
     stage_instances: Array<object> // TODO: STAGE INSTANCE OBJECT
     guild_scheduled_events: Array<object> // TODO: SCHEDULED EVENT OBJECT

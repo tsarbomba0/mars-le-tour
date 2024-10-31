@@ -4,10 +4,10 @@ import { User } from "../../classes/Guild/User";
  * Type for a Discord Emoji.
  */
 export type Emoji = { 
-    id: string;
-    name?: string;
+    id: string|null;
+    name?: string|null;
     roles?: Array<string>;
-    user: User;
+    user?: User;
     require_colons?: boolean;
     managed?: boolean;
     animated?: boolean;

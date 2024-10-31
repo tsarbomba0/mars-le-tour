@@ -1,6 +1,7 @@
 import { discordGuildOptions } from "../../types/Discord/discordGuildOptions";
 import { Emoji } from "../../types/Media/Emoji";
 import { URL } from "../../types/Media/URL";
+import { CategoryChannel } from "../CategoryChannel";
 import { DMChannel, GuildChannel, VoiceChannel } from "../Channel";
 import { GuildMember } from "./GuildMember";
 import { Role } from "./Role";
@@ -59,6 +60,7 @@ export class Guild extends Map {
     stickers?: Array<Object> // TODO: STICKER OBJECT
     premium_progress_bar_enabled: boolean;
     safety_alerts_channel_id: string; // TODO: SNOWFLAKE
+    categories: Array<CategoryChannel>
     constructor(guildOptions: discordGuildOptions){
         super()
         this.id = guildOptions.id; 
@@ -110,11 +112,29 @@ export class Guild extends Map {
         this.premium_progress_bar_enabled = guildOptions.premium_progress_bar_enabled;
         this.safety_alerts_channel_id = guildOptions.safety_alerts_channel_id; // TODO: SNOWFLAKE
 
+        this.channels = new Map<string, DMChannel|VoiceChannel|GuildChannel>
+        this.categories = []
         // Channel conversion to class
         guildOptions.channels.forEach((channel) => {
             // TODO: Detect if it's a DM/Voice/Guild channel
             // And typing....
-            this.channels.set(channel.id, new GuildChannel(channel))
+            switch(channel.type){
+                case 4: 
+                    this.categories.push(new CategoryChannel(channel))
+                break;
+                case 0: 
+                    this.channels.set(channel.id, new GuildChannel(channel))
+                break;
+            }
+        })
+
+        // Attach child channels to their category channels
+        this.categories.forEach((category) => {
+            this.channels.forEach((channel) => {
+                if(category.get("id") === channel.get("parentId")){
+                    category.addChild(channel)
+                }
+            })
         })
         // Guild map
         Object.getOwnPropertyNames(this).forEach((propertyName) => {
@@ -149,6 +169,7 @@ export class Guild extends Map {
             break;
             default:
                 throw new Error(`Incorrect option! Got ${type}, expected: banner, icon, splash or discoverySplash`)
+            break;
         }
     }
 }
