@@ -1,3 +1,4 @@
+import { Role } from "./Role";
 import { User } from "./User";
 
 /**
@@ -8,7 +9,7 @@ export class GuildMember {
     nick?: string;
     avatar?: string;
     banner?: string | null;
-    roles: Array<Object>
+    roles: Array<Role>
     joined_at: string;
     premium_since?: string;
     deaf: boolean;
