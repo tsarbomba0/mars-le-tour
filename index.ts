@@ -3,7 +3,6 @@ import { DiscordClient } from './classes/DiscordClient'
 import { integerOption, stringOption } from './classes/Option'
 import { SlashCommand } from './classes/interactions/SlashCommand'
 import { token, token2 } from './constants'
-import { Guild } from './types/Guild/Guild'
 import { Interaction } from './classes/interactions/Interaction'
 import { Embed } from './classes/Embed'
 import { Button } from './classes/Components/Button'
@@ -11,7 +10,7 @@ import { ActionRow } from './classes/Components/ActionRow'
 import { TextInput } from './classes/components/TextInput'
 const client = new DiscordClient(token2)
 
-client.on('messageCreate', (msg) => {
+client.on(Events.messageCreate, (msg) => {
     if(msg.author.id == client.user.id){
         return;
     }
@@ -33,9 +32,10 @@ client.on(Events.interactionCreate, async (interaction: Interaction) => {
         .isRequired()
     ]) 
 
-    if(interaction.name = "test"){
+    if(interaction.name === "test"){
         console.log(JSON.stringify(modal))
         await interaction.replyModal({ title: "Modal.", custom_id: "Modal", components: [modal]})
+        console.log(interaction.guild?.get("id"))
     }
 
 })

@@ -7,6 +7,7 @@ import { Guild } from "./Guild/Guild";
 import { GuildMember } from "./Guild/GuildMember";
 import { InteractionOptions } from "../types/Options/InteractionOptions";
 import { Interaction } from "./interactions/Interaction";
+import { discordGuildOptions } from "../types/Discord/discordGuildOptions";
 
 
 
@@ -81,7 +82,8 @@ export class DiscordClient extends EventEmitter {
                             // GUILD_CREATE => emits ready when the amount of unavailable guilds is equal to the amount of guilds in the map
                             case Events.guildCreate: 
                                 if(gatewayData){
-                                    this.guilds.set(gatewayData.id, (gatewayData as Guild))
+                                    console.log(gatewayData)
+                                    this.guilds.set(gatewayData.id, new Guild((gatewayData as discordGuildOptions)))
                                     if(!this.ready){
                                         this.launchActualGuilds += 1
                                         if(this.launchActualGuilds === this.launchExpectedGuilds){
