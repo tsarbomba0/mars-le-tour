@@ -1,6 +1,7 @@
 import { apiUrls } from "../enums/ApiURLs"
 import { interactionCallback } from "../enums/InteractionCallback"
 import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse"
+import { MessageRequest } from "../types/Discord/discordMessageOptions"
 import { headerObject } from "./Objects/header"
 
 /**
@@ -11,7 +12,7 @@ import { headerObject } from "./Objects/header"
 async function getChannel(id: string): Promise<DiscordAPIResponse>{
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
         method: 'GET',
-        headers: headerObject,
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
         body: null
     })
     return (await response.json())
@@ -37,10 +38,10 @@ async function postChannel(id: string, body: object, endpoint: string, token: st
  * @param endpoint Endpoint to use.
  * @returns Object
  */
-async function deleteChannel(id: string, endpoint: string): Promise<DiscordAPIResponse>{
+async function deleteChannel(id: string, endpoint: string, token: string): Promise<DiscordAPIResponse>{
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
         method: 'DELETE',
-        headers: headerObject,
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
         body: null
     })
     return (await response.json())
@@ -50,14 +51,28 @@ async function deleteChannel(id: string, endpoint: string): Promise<DiscordAPIRe
  * @param id Channel ID
  * @returns Object
  */
-async function putChannel(id: string): Promise<DiscordAPIResponse>{
-    let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
-        method: 'DELETE',
-        headers: headerObject,
-        body: null
+async function putChannel(id: string, endpoint: string, token: string, body?: MessageRequest): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}/${endpoint}`, {
+        method: 'PUT',
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
+        body: JSON.stringify(body)
     })
     return (await response.json())
 }
+/**
+ * Function to get a channel by id using Discord's REST api.
+ * @param id Channel ID
+ * @returns Object
+ */
+async function patchChannel(id: string, endpoint: string, body: Object, token: string): Promise<DiscordAPIResponse>{
+    let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
+        method: 'PATCH',
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
+        body: JSON.stringify(body)
+    })
+    return (await response.json())
+}
+
 const Channels = {
     post: postChannel,
     put: putChannel,

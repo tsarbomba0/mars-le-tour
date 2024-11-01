@@ -6,7 +6,7 @@ import { DMChannel, GuildChannel, VoiceChannel } from "../Channel";
 import { GuildMember } from "./GuildMember";
 import { Role } from "./Role";
 const ImageUrl = "https://cdn.discordapp.com"
-
+let botToken;
 /**
  * Class for a Discord Guild
  */
@@ -61,7 +61,7 @@ export class Guild extends Map {
     premium_progress_bar_enabled: boolean;
     safety_alerts_channel_id: string; // TODO: SNOWFLAKE
     categories: Array<CategoryChannel>
-    constructor(guildOptions: discordGuildOptions){
+    constructor(guildOptions: discordGuildOptions, token: string){
         super()
         this.id = guildOptions.id; 
         this.members = guildOptions.members;
@@ -112,6 +112,8 @@ export class Guild extends Map {
         this.premium_progress_bar_enabled = guildOptions.premium_progress_bar_enabled;
         this.safety_alerts_channel_id = guildOptions.safety_alerts_channel_id; // TODO: SNOWFLAKE
 
+        botToken = token
+        
         this.channels = new Map<string, DMChannel|VoiceChannel|GuildChannel>
         this.categories = []
         // Channel conversion to class
@@ -123,7 +125,7 @@ export class Guild extends Map {
                     this.categories.push(new CategoryChannel(channel))
                 break;
                 case 0: 
-                    this.channels.set(channel.id, new GuildChannel(channel))
+                    this.channels.set(channel.id, new GuildChannel(channel, botToken))
                 break;
             }
         })

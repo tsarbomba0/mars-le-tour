@@ -84,7 +84,7 @@ export class DiscordClient extends EventEmitter {
                             // GUILD_CREATE => emits ready when the amount of unavailable guilds is equal to the amount of guilds in the map
                             case Events.guildCreate: 
                                 if(gatewayData){
-                                    let newGuild = new Guild((gatewayData as discordGuildOptions))
+                                    let newGuild = new Guild((gatewayData as discordGuildOptions), this.token)
                                     this.guilds.set(gatewayData.id, newGuild)
                                     if(!this.ready){
                                         this.launchActualGuilds += 1

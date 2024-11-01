@@ -1,4 +1,5 @@
 import { REST } from "../rest/REST";
+import { MessageRequest } from "../types/Discord/discordMessageOptions";
 import { DMChannel, GuildChannel } from "./Channel";
 import { ActionRow } from "./Components/ActionRow";
 import { Button } from "./Components/Button";
@@ -134,12 +135,13 @@ export class Message {
         this.member = options.member
         
         if(this.guildId){
+            //@ts-ignore
             this.channel = client.guilds.get(this.guildId)?.channels.get(this.channelId)
         }
     }
-    public async reply(text: string): Promise<void> {
+    public async reply(content: MessageRequest): Promise<void> {
         const resp = await REST.Channels.post(this.channelId, {
-            content: text,
+            content,
             message_reference: {
                 type: 0,
                 message_id: this.id,

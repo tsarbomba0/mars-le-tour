@@ -1,9 +1,11 @@
 import { User } from "../classes/Guild/User";
 import { ChannelTypes } from "../enums/ChannelTypes";
+import { REST } from "../rest/REST";
 import { discordChannel } from "../types/Discord/discordChannel";
+import { MessageRequest } from "../types/Discord/discordMessageOptions";
 import { Emoji } from "../types/Media/Emoji";
 import { CategoryChannel } from "./CategoryChannel";
-
+let botToken: string;
 
 /**
  * A type for the value in the maps used for channel classes
@@ -29,7 +31,7 @@ export class VoiceChannel extends Map<string, channelMapValue> {
     flags: number;
     bitrate: number;
     */
-    constructor(payload: discordChannel){
+    constructor(payload: discordChannel, token: string){
         super();
         this.id = payload.id;
         this.parentId = payload.parent_id;
@@ -54,10 +56,36 @@ export class VoiceChannel extends Map<string, channelMapValue> {
 export class DMChannel extends Map<string, channelMapValue> {
     id: string;
     parentId: string;
-    constructor(payload){
+    constructor(payload, token: string){
         super(payload)
         this.id = payload.id
         this.parentId = payload.parent_id
+        botToken = token
+    }
+    /**
+     * Sends a message to the channel
+     * @param message MessageRequest object
+     */
+    public async sendMessage(message: MessageRequest): Promise<void>{
+        let response = await REST.Channels.post(this.id, message, 'messages', botToken)
+        console.log((await response))
+    }
+    /**
+     * Deletes a message.
+     * @param id ID of the Message to delete in the channel
+     */
+    public async deleteMessage(id: string): Promise<void> {
+        let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken)
+        console.log((await response))
+    }
+     /**
+     * Creates a reaction.
+     * @param messageId ID of the target Message
+     * @param emojiName Name of the emoji (if using custom emoji => name:id)
+     */
+    public async reactMessage(messageId: string, emojiName: string): Promise<void>{
+        let response = await REST.Channels.put(this.id, `/messages/${messageId}/reactions/${emojiName}/@me`, botToken)
+        console.log((await response))
     }
 }
 /**
@@ -77,7 +105,7 @@ export class GuildChannel extends Map<string, channelMapValue> {
     icon_emoji: Emoji
     flags: number;
     */
-    constructor(payload: discordChannel){
+    constructor(payload: discordChannel, token: string){
         super();
         this.id = payload.id
         this.parentId = payload.parent_id
@@ -93,5 +121,33 @@ export class GuildChannel extends Map<string, channelMapValue> {
         this.set('id', payload.id);
         this.set('icon_emoji', payload.icon_emoji);
         this.set('flags', payload.flags);
+        botToken = token
+
     }
+
+    /**
+     * Sends a message to the channel
+     * @param message MessageRequest object
+     */
+    public async sendMessage(message: MessageRequest): Promise<void>{
+        let response = await REST.Channels.post(this.id, message, 'messages', botToken)
+        console.log((await response))
+    }
+    /**
+     * Deletes a message.
+     * @param id ID of the Message to delete in the channel
+     */
+    public async deleteMessage(id: string): Promise<void> {
+        let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken )
+        console.log((await response))
+    }
+     /**
+     * Creates a reaction.
+     * @param messageId ID of the target Message
+     * @param emojiName Name of the emoji (if using custom emoji => name:id)
+     */
+     public async reactMessage(messageId: string, emojiName: string): Promise<void>{
+        let response = await REST.Channels.put(this.id, `/messages/${messageId}/reactions/${emojiName}/@me`, botToken)
+        console.log((await response))
+     }
 }

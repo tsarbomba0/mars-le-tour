@@ -15,9 +15,8 @@ client.on(Events.messageCreate, (msg: Message) => {
     if(msg.author.id == client.user.id){
         return;
     }
-    console.log(msg)
-    msg.reply({ content: "Hah!"})
-    msg.forward()
+    console.log(msg.content!)
+    msg.channel?.reactMessage(msg.id, "U+1F924")
 
 })
  
