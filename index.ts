@@ -16,6 +16,9 @@ client.on(Events.messageCreate, (msg: Message) => {
         return;
     }
     console.log(msg)
+    msg.reply({ content: "Hah!"})
+    msg.forward()
+
 })
  
 client.on('ready', (a) => {

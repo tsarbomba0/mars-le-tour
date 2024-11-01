@@ -1,3 +1,4 @@
+import { REST } from "../rest/REST";
 import { DMChannel, GuildChannel } from "./Channel";
 import { ActionRow } from "./Components/ActionRow";
 import { Button } from "./Components/Button";
@@ -9,6 +10,7 @@ import { GuildMember } from "./Guild/GuildMember";
 import { User } from "./Guild/User";
 import { Interaction } from "./interactions/Interaction";
 
+let token: string;
 export type messageOptions = {
     id: string;
     channel_id: string;
@@ -90,6 +92,9 @@ export class Message {
     channel?: DMChannel|GuildChannel
 
     constructor(options: messageOptions, client: DiscordClient){
+        // Client token
+        token = client.token
+
         this.id = options.id;
         this.channelId = options.channel_id;
         this.author = options.author;
@@ -127,10 +132,34 @@ export class Message {
         this.call = options.call;
         this.guildId = options.guild_id
         this.member = options.member
-        console.log(this.guildId)
+        
         if(this.guildId){
             this.channel = client.guilds.get(this.guildId)?.channels.get(this.channelId)
-            console.log(client.guilds.get(this.guildId))
         }
     }
+    public async reply(text: string): Promise<void> {
+        const resp = await REST.Channels.post(this.channelId, {
+            content: text,
+            message_reference: {
+                type: 0,
+                message_id: this.id,
+                channel_id: this.channel?.id,
+                guild_id: this.guildId,
+                fail_if_not_exists: true
+            }
+        }, "messages", token)
+        console.log((await resp))
+    } 
+    public async forward(): Promise<void> {
+        const resp = await REST.Channels.post(this.channelId, {
+            message_reference: {
+                type: 1,
+                message_id: this.id,
+                channel_id: this.channel?.id,
+                guild_id: this.guildId,
+                fail_if_not_exists: true
+            }
+        }, "messages", token)
+        console.log((await resp))
+    } 
 }

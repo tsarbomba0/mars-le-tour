@@ -23,7 +23,6 @@ export class CategoryChannel extends Map<string, any> {
     }
 
     addChild(child: DMChannel|VoiceChannel|GuildChannel){
-        console.log("HEHE!", child.id)
         this.children.set(child.id, child)
     }
 }

@@ -23,10 +23,10 @@ async function getChannel(id: string): Promise<DiscordAPIResponse>{
  * @param endpoint The endpoint to use.
  * @returns Object
  */
-async function postChannel(id: string, body: object, endpoint: string): Promise<DiscordAPIResponse>{
+async function postChannel(id: string, body: object, endpoint: string, token: string): Promise<DiscordAPIResponse>{
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}/${endpoint}`, {
         method: 'POST',
-        headers: headerObject,
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
         body: JSON.stringify(body)
     })
     return (await response.json())
@@ -58,7 +58,11 @@ async function putChannel(id: string): Promise<DiscordAPIResponse>{
     })
     return (await response.json())
 }
-
+const Channels = {
+    post: postChannel,
+    put: putChannel,
+    delete: deleteChannel
+}
 
 
 /**
@@ -210,6 +214,10 @@ export const REST = {
     * Object containing methods related to the Webhook API.
     */
     Webhook: webhookAPI,
+    /**
+     * Object containing methods related to the Channel Endpoint
+     */
+    Channels: Channels,
 }
 
 

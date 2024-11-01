@@ -13,7 +13,7 @@ import { Message } from "./Message";
 
 
 export class DiscordClient extends EventEmitter {
-    private token: string;
+    
     private resumeUrl: string;
     private sessionId: string;
     private gatewayApiConnection: WebSocket
@@ -27,7 +27,8 @@ export class DiscordClient extends EventEmitter {
     user: User;
     username: string;
     ready: boolean = false;
-
+    token: string;
+    
     constructor(token: string){
         super();
 
@@ -232,20 +233,5 @@ export class DiscordClient extends EventEmitter {
         })        
     }
     // methods
-    public async sendMessage(text: string, channelid: string): Promise<void> {
-        console.log(this.token)
-        const resp = await fetch(`https://discord.com/api/v10/channels/${channelid}/messages`,
-            {
-                method: 'POST',
-                headers: {
-                    'User-Agent': 'DiscordBot (mars-le-tour, 1.0.0)',
-                    'Authorization': `Bot ${this.token}`,
-                    'Content-Type': 'application/json', 
-                },
-                body: JSON.stringify({
-                    content: text
-                }),
-            }
-        )
-    }
+    
 }   
