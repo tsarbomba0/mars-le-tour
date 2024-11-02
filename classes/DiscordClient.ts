@@ -104,9 +104,12 @@ export class DiscordClient extends EventEmitter {
                             case Events.guildUpdate: 
                                 gatewayData ? true : () => {throw new Error(`Event ${Events.guildUpdate} has null data`);}
                                 let oldGuild = this.guilds.get(gatewayData!.id)!
+                                /* TODO FIGURE THIS OUT?
                                 Object.keys(gatewayData!).map((key) => {
                                     this.guilds.get(gatewayData!.id)![key] = gatewayData![key]
                                 })
+                                */
+                                this.guilds.set(gatewayData!.id, new Guild((gatewayData as discordGuildOptions), this.token))  // To be replaced
                                 this.emit(Events.guildUpdate)
                             break;   
                             // GUILD_MEMBER_ADD
