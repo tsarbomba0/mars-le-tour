@@ -2,6 +2,7 @@ import { apiUrls } from "../enums/ApiURLs"
 import { interactionCallback } from "../enums/InteractionCallback"
 import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse"
 import { MessageRequest } from "../types/Discord/discordMessageOptions"
+import { MultiPartRequest } from "../util/multipartRequest"
 import { headerObject } from "./Objects/header"
 
 /**
@@ -9,7 +10,7 @@ import { headerObject } from "./Objects/header"
  * @param id Channel ID
  * @returns Object
  */
-async function getChannel(id: string): Promise<DiscordAPIResponse>{
+async function getChannel(id: string, token: string): Promise<DiscordAPIResponse>{
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}`, {
         method: 'GET',
         headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
@@ -24,11 +25,23 @@ async function getChannel(id: string): Promise<DiscordAPIResponse>{
  * @param endpoint The endpoint to use.
  * @returns Object
  */
-async function postChannel(id: string, body: object, endpoint: string, token: string): Promise<DiscordAPIResponse>{
+async function postChannel(id: string, message: MultiPartRequest|object, endpoint: string, token: string): Promise<DiscordAPIResponse>{
+    let messageBody: string = "";
+    let contentType: string = "";
+    if(typeof message === "object"){
+        //messageBody = message
+        contentType = 'multipart/form-data; boundary=HIHI'
+    } else if (typeof message === "object"){
+        messageBody = JSON.stringify(message)
+    }
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}/${endpoint}`, {
         method: 'POST',
-        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
-        body: JSON.stringify(body)
+        headers: {
+            'Authorization': `Bot ${token}`,
+            'Content-Type': contentType,
+            "User-Agent": "DiscordBot (mars-le-tour 1.0.0)"
+        },
+        body: messageBody
     })
     return (await response.json())
 }

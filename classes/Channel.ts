@@ -66,7 +66,7 @@ export class DMChannel extends Map<string, channelMapValue> {
      * Sends a message to the channel
      * @param message MessageRequest object
      */
-    public async sendMessage(message: MessageRequest): Promise<void>{
+    public async sendMessage(message): Promise<void>{
         let response = await REST.Channels.post(this.id, message, 'messages', botToken)
         console.log((await response))
     }
@@ -129,9 +129,9 @@ export class GuildChannel extends Map<string, channelMapValue> {
      * Sends a message to the channel
      * @param message MessageRequest object
      */
-    public async sendMessage(message: MessageRequest): Promise<void>{
+    public async sendMessage(message): Promise<void>{
         let response = await REST.Channels.post(this.id, message, 'messages', botToken)
-        console.log((await response))
+        console.dir((await response), { depth: null})
     }
     /**
      * Deletes a message.

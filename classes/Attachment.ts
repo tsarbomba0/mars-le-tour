@@ -15,22 +15,24 @@ export class Attachment {
     proxy_url?: string;
     height?: number
     width?: number
-    ephemeral?: boolean
+    ephemeral?: boolean = false;
+
+    // Voice messages only
     duration_secs?: number;
     waveform?: string;
+
     flags?: string;
 
     constructor(){
-        this.id = generateDiscordSnowflake(2000, 2000).toString()
+        
     }
 
     public setFilename(filename: string): Attachment{
         this.filename = filename
         return this
     }
-
-    public setUrl(url: URL): Attachment{
-        this.url = url
+    public setID(id: string): Attachment {
+        this.id = id
         return this
     }
 
@@ -41,6 +43,32 @@ export class Attachment {
 
     public setDescription(description: string): Attachment {
         this.description = description
+        return this
+    }
+
+    public setType(type: string): Attachment {
+        this.content_type = type
+        return this
+    }
+
+    public setResolution(height: number, width: number): Attachment{
+        this.height = height
+        this.width = width
+        return this
+    }
+
+    public isEphemeral(): Attachment {
+        this.ephemeral = true
+        return this
+    }
+
+    /**
+     * Sets the flags for the attachment
+     * @param flags Bitfield of the attachment flags (Currently only flag is the Remix flag, which is 1 << 2)
+     * @returns Attachment
+     */
+    public setFlags(flags: string): Attachment{
+        this.flags = flags
         return this
     }
 

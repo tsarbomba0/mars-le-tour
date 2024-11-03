@@ -9,16 +9,59 @@ import { Button } from './classes/Components/Button'
 import { ActionRow } from './classes/Components/ActionRow'
 import { TextInput } from './classes/components/TextInput'
 import { Message } from './classes/Message'
+import { Attachment } from './classes/Attachment'
+import { MultiPartRequest } from './util/multipartRequest'
+const fs = require('fs')
 const client = new DiscordClient(token2)
 
-client.on(Events.messageCreate, (msg: Message) => {
+client.on(Events.messageCreate, async (msg: Message) => {
     if(msg.author.id == client.user.id){
         return;
     }
-    console.log(msg.content!)
-    msg.channel?.reactMessage(msg.id, "U+1F924")
+
+    const attach = new Attachment()
+        .setID("0")
+        .setFilename("testfile.jpg")
+        .setDescription("A file!")
+        .finalize()
+    let Request = new MultiPartRequest('--HIHI')
+        .insertBoundary()
+        .contentDisposition("name=\"payload_json\"")
+        .contentType("application/json\r\n")
+        .insertStringData(JSON.stringify({
+            content: "Hah!",
+            attachments: [attach]
+        }, null, 2))
+        .insertBoundary()
+        .contentDisposition("name=\"files[0]\"; filename=\"testfile.jpg\"")
+        .contentType(`image/jpeg`)
+        .contentTransferEncoding('base64')
+        .insertCRLF()
+        .insertBase64("D:\\Pobrane\\test.jpg")
+        .endBoundary()
+        .finalize()
+        
+    msg.channel?.sendMessage(Request)
 
 })
+
+/**
+ * console.log(
+    new MultiPartRequest()
+    .boundary("--123")
+    .contentDispositon("name=\"test\"")
+    .contentType("application/json")
+    .insertStringData(JSON.stringify({
+        content: "ABC",
+    }, null, 2))
+    .boundary("--123")
+    .contentDispositon("name=\"files[0]\"; filename=\"testfile.png\"")
+    .contentType("image/png")
+    //.insertBuffer('D:\\Pobrane\\test.jpg')
+    .boundary("--123--")
+    .data
+)
+ */
  
 client.on('ready', (a) => {
     console.log("Mars-le-tour!")

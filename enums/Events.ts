@@ -62,6 +62,8 @@ export enum Events {
     messagePollVoteAdd = "MESSAGE_POLL_VOTE_ADD",
     messagePollVoteRemove = "MESSAGE_POLL_VOTE_REMOVE",
 
+    // Channel Update
+    channelUpdate = "CHANNEL_UPDATE"
     // TODO: 
     /*
     - Auto moderation events

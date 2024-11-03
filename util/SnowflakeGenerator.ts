@@ -4,11 +4,11 @@
  * @param sequenceNumber Sequence Number - Cannot be larger than 4096 or smaller than 0
  * @returns Number
  */
-export function generateDiscordSnowflake(machineId: number, sequenceNumber: number): Number{
+export function generateDiscordSnowflake(machineId: number, sequenceNumber: number): number{
     if(machineId>1024 || machineId < 0){
         throw new Error("Bad machine id!")
     } else if (sequenceNumber>4096 || sequenceNumber<0){
         throw new Error("Bad sequence number!")
     }
-    return Number(new Date("1 January 2015").valueOf().toString(2) + machineId.toString(2) + sequenceNumber.toString(2))
+    return parseInt(new Date("1 January 2015").valueOf().toString(2) + machineId.toString(2) + sequenceNumber.toString(2), 2)
 }

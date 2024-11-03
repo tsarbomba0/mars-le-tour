@@ -139,18 +139,15 @@ export class Message {
             this.channel = client.guilds.get(this.guildId)?.channels.get(this.channelId)
         }
     }
-    public async reply(content: MessageRequest): Promise<void> {
-        const resp = await REST.Channels.post(this.channelId, {
-            content,
-            message_reference: {
-                type: 0,
-                message_id: this.id,
-                channel_id: this.channel?.id,
-                guild_id: this.guildId,
-                fail_if_not_exists: true
-            }
-        }, "messages", token)
-        console.log((await resp))
+    public async reply(content): Promise<void> {
+        const resp = await REST.Channels.post(this.channelId, Object.assign(content, {message_reference: {
+            type: 0,
+            message_id: this.id,
+            channel_id: this.channel?.id,
+            guild_id: this.guildId,
+            fail_if_not_exists: true
+        }}), "messages", token)
+        console.dir((await resp), { depth: null})
     } 
     public async forward(): Promise<void> {
         const resp = await REST.Channels.post(this.channelId, {
