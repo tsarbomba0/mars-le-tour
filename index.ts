@@ -24,44 +24,21 @@ client.on(Events.messageCreate, async (msg: Message) => {
         .setFilename("testfile.jpg")
         .setDescription("A file!")
         .finalize()
-    let Request = new MultiPartRequest('--HIHI')
-        .insertBoundary()
-        .contentDisposition("name=\"payload_json\"")
-        .contentType("application/json\r\n")
-        .insertStringData(JSON.stringify({
-            content: "Hah!",
-            attachments: [attach]
-        }, null, 2))
-        .insertBoundary()
-        .contentDisposition("name=\"files[0]\"; filename=\"testfile.jpg\"")
-        .contentType(`image/jpeg`)
-        .contentTransferEncoding('base64')
-        .insertCRLF()
-        .insertBase64("D:\\Pobrane\\test.jpg")
-        .endBoundary()
-        .finalize()
-        
-    msg.channel?.sendMessage(Request)
+    /*
+    msg.channel?.sendMessage({ 
+        content: "Test!"
+    },
+     ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
+    )
+    */
+    msg.reply({ 
+        content: "Test!"
+    },
+     ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
+    )
 
 })
 
-/**
- * console.log(
-    new MultiPartRequest()
-    .boundary("--123")
-    .contentDispositon("name=\"test\"")
-    .contentType("application/json")
-    .insertStringData(JSON.stringify({
-        content: "ABC",
-    }, null, 2))
-    .boundary("--123")
-    .contentDispositon("name=\"files[0]\"; filename=\"testfile.png\"")
-    .contentType("image/png")
-    //.insertBuffer('D:\\Pobrane\\test.jpg')
-    .boundary("--123--")
-    .data
-)
- */
  
 client.on('ready', (a) => {
     console.log("Mars-le-tour!")

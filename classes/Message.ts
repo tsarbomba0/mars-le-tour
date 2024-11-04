@@ -139,14 +139,14 @@ export class Message {
             this.channel = client.guilds.get(this.guildId)?.channels.get(this.channelId)
         }
     }
-    public async reply(content): Promise<void> {
+    public async reply(content, filepath?: Array<string>): Promise<void> {
         const resp = await REST.Channels.post(this.channelId, Object.assign(content, {message_reference: {
             type: 0,
             message_id: this.id,
             channel_id: this.channel?.id,
             guild_id: this.guildId,
             fail_if_not_exists: true
-        }}), "messages", token)
+        }}), "messages", token, filepath)
         console.dir((await resp), { depth: null})
     } 
     public async forward(): Promise<void> {
