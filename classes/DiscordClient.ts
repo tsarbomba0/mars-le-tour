@@ -11,7 +11,9 @@ import { discordGuildOptions } from "../types/Discord/discordGuildOptions";
 import { Message } from "./Message";
 
 
-
+/**
+ * Class representing a discord Client
+ */
 export class DiscordClient extends EventEmitter {
     
     private resumeUrl: string;

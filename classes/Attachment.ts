@@ -21,42 +21,69 @@ export class Attachment {
     duration_secs?: number;
     waveform?: string;
 
-    flags?: string;
-
-    constructor(){
-        
-    }
-
+    flags?: string; 
+    /**
+     * Sets the filename used by the attachment
+     * @param {string} filename 
+     * @returns {Attachment}
+     */
     public setFilename(filename: string): Attachment{
         this.filename = filename
         return this
     }
+    /**
+     * Sets the Attachment's ID, must be the same as the id of the file sent with it.
+     * @param {string} id 
+     * @returns {Attachment}
+     */
     public setID(id: string): Attachment {
         this.id = id
         return this
     }
-
+    /**
+     * Sets the Attachment's title.
+     * @param {string} title 
+     * @returns {Attachment}
+     */
     public setTitle(title: string): Attachment {
         this.title = title
         return this
     }
 
+    /**
+     * Sets the Attachment's description.
+     * @param {string} description
+     * @returns {Attachment}
+     */
     public setDescription(description: string): Attachment {
         this.description = description
         return this
     }
-
+    /**
+     * Sets the Attachment's content type.
+     * @param {string} description
+     * @returns {Attachment}
+     */
     public setType(type: string): Attachment {
         this.content_type = type
         return this
     }
-
+    /**
+     * Sets the resolution for the Attachment's video/image
+     * @param {number} height 
+     * @param {number} width 
+     * @returns {Attachment}
+     */
     public setResolution(height: number, width: number): Attachment{
         this.height = height
         this.width = width
         return this
     }
 
+    /**
+     * Flags the attachment as ephemeral
+     * @returns {Attachment}
+     */
     public isEphemeral(): Attachment {
         this.ephemeral = true
         return this
@@ -74,7 +101,7 @@ export class Attachment {
 
     /**
      * Returns a Attachment object with only values that are not undefined
-     * @returns Attachment
+     * @returns {Attachment}
      */
     public finalize(){
         let returnObject = {}

@@ -1,6 +1,9 @@
 import { discordChannel } from "../types/Discord/discordChannel";
 import { DMChannel, GuildChannel, VoiceChannel } from "./Channel";
 
+/**
+ * Class for a Discord category containing channels
+ */
 export class CategoryChannel extends Map<string, any> {
     children: Map<string, DMChannel|VoiceChannel|GuildChannel>
     version: number;
