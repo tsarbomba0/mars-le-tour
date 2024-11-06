@@ -93,9 +93,7 @@ export class Guild extends Map {
         this.system_channel_id = guildOptions.system_channel_id; 
         this.system_channel_flags = guildOptions.system_channel_flags; 
         this.rules_channel_id = guildOptions.rules_channel_id; 
-        this.max_presences = guildOptions.max_presences;
         this.max_members = guildOptions.max_members;
-        this.vanity_url_code = guildOptions.vanity_url_code;
         this.description = guildOptions.description;
         this.banner = guildOptions.banner;
         this.premium_tier = guildOptions.premium_tier;

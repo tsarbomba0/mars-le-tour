@@ -6,7 +6,7 @@ import { User } from "../../classes/Guild/User";
 import { discordGuildOptions } from "./discordGuildOptions";
 import { messageOptions } from "../../classes/Message";
 
-export interface discordPayloadData extends Omit<messageOptions, "application_id"|"flags"|"guild_id">, User, Omit<Guild, "application_id"|"channels">, Omit<GuildMember, 'banner'|'avatar'|'avatar_decoration_data'>, Omit<InteractionOptions, 'name'|'channel_id'>, Omit<discordGuildOptions, "application_id"> {
+export interface discordPayloadData extends Omit<messageOptions, "application_id"|"flags"|"guild_id">, Omit<User, "banner">, Omit<Guild, "application_id"|"channels">, Omit<GuildMember, 'banner'|'avatar'|'avatar_decoration_data'>, Omit<InteractionOptions, 'name'|'channel_id'>, Omit<discordGuildOptions, "application_id"> {
     heartbeat_interval: number
     user: User; 
     session_id: string;

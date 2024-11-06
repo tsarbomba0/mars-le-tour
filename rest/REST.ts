@@ -1,12 +1,120 @@
+import { DMChannel } from "../classes/Channel.ts"
+import { User } from "../classes/Guild/User.ts"
 import { Message, messageOptions } from "../classes/Message"
 import { apiUrls } from "../enums/ApiURLs"
 import { ContentTypes } from "../enums/ContentTypes.ts"
 import { interactionCallback } from "../enums/InteractionCallback"
 import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse"
 import { MessageRequest } from "../types/Discord/discordMessageOptions"
+import { userPatchRequest } from "../types/Discord/discordRequestTypes.ts"
 import { MultiPartRequest } from "../util/multipartRequest"
 import { headerObject } from "./Objects/header"
 
+/**
+ * Sends a GET request to the user endpoint.
+ * @param id ID of the User.
+ * @param token Bot token.
+ * @param endpoint Endpoint to use.
+ * @returns {Promise<User>}
+ */
+async function getUser(id: string, token: string, endpoint: string): Promise<User>{
+    let response = await fetch(`${apiUrls.regularURI}/users/${id}/${endpoint}`,
+        {
+            method: 'GET',
+            headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
+            body: null
+        }
+    )
+    if (await response.ok === true){
+        return response.json()
+    } else {
+        throw new Error((await response.json() as DiscordAPIResponse).message)
+    }
+}
+
+/**
+ * Sends a PATCH request to user endpoint.
+ * @param {userPatchRequest} options Object containing options for the patch request.
+ * @param {string} token Bot token.
+ * @returns {Promise<User>}
+ */
+async function patchUser(options: userPatchRequest, token: string): Promise<User>{
+    /*
+    MIGHT MOVE THIS OUTSIDE THIS METHOD!
+    TODO IG?
+    */
+    // Multi-part request
+    let request = new MultiPartRequest()
+    
+        
+    // If one of them is defined, continue. 
+    if(options.avatar !== undefined || options.banner !== undefined){
+        ['avatar', 'banner'].forEach((property) => {
+            if(property){
+                request.insertBoundary() //
+                let match = options[property].match(/([^\\]*$)/)
+
+                if(match !== null){
+                    let filename = match[0]
+                    request.contentOptions({
+                        contentDisposition: `name=\"${property}\"; filename=\"${filename}\"`,
+                        contentType: ContentTypes[filename.match(/([^\.]*$)/)![0]],
+                        contentTransferEncoding: 'base64'
+                    })
+                    request.insertBase64(options[property])
+                } else {
+                    throw new Error(`Couldn't find such a file: ${options[property]}!`)
+                }
+            }
+        })
+    }
+
+    // If username is defined, add as json data
+    if(options.username){
+        request.contentOptions({
+            contentDisposition: "name=\"payload_json\"",
+            contentType: "application/json"
+        })
+        request.insertJSONData({
+            username: options.username
+        })
+    }
+
+    // End boundary for the request
+    request.endBoundary()
+        
+
+    let response = await fetch(`${apiUrls.regularURI}/users/@me`,
+        {
+            method: 'PATCH',
+            headers: {
+                'User-Agent': 'DiscordBot mars-le-tour 1.0.0',
+                'Content-Type': ` multipart/form-data; boundary=${request.boundary}`
+            },
+            body: request.finalize()
+        }
+    )
+    if (await response.ok === true){
+        return response.json()
+    } else {
+        throw new Error((await response.json() as DiscordAPIResponse).message)
+    }
+}
+
+async function postUser(options: object, token: string): Promise<DiscordAPIResponse|DMChannel>{
+    let response = await fetch(`${apiUrls.regularURI}/users/@me/channels`,{
+        method: 'POST',
+        headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
+        body: JSON.stringify(options)
+    })
+    return (await response.json())
+}
+
+const Users = {
+    patch: patchUser,
+    get: getUser,
+    post: postUser
+}
 
 /**
  * Function to get a channel by id using Discord's REST api.
@@ -21,6 +129,8 @@ async function getChannel(id: string, token: string): Promise<DiscordAPIResponse
     })
     return (await response.json())
 }
+
+
 /**
  * Function to send a POST to the channel endpoint
  * @param {string} id Channel ID.
@@ -299,6 +409,8 @@ export const REST = {
      * Object containing methods related to the Channel Endpoint
      */
     Channels: Channels,
+
+    Users: Users
 }
 
 
