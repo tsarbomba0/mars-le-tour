@@ -1,5 +1,7 @@
 import { REST } from "../rest/REST";
+import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse";
 import { MessageRequest } from "../types/Discord/discordMessageOptions";
+import { mediaSend } from "../util/mediaSend";
 import { DMChannel, GuildChannel } from "./Channel";
 import { ActionRow } from "./Components/ActionRow";
 import { Button } from "./Components/Button";
@@ -128,7 +130,7 @@ export class Message {
         this.stickerItems = options.sticker_items;
         this.position = options.position;
         this.roleSubscriptionData = options.role_subscription_data;
-        this.resolved = options.resolved;
+        this.resolved = options.resolved; 
         this.poll = options.poll;
         this.call = options.call;
         this.guildId = options.guild_id
@@ -139,16 +141,24 @@ export class Message {
             this.channel = client.guilds.get(this.guildId)?.channels.get(this.channelId)
         }
     }
-    public async reply(content, filepath?: Array<string>): Promise<void> {
-        const resp = await REST.Channels.post(this.channelId, Object.assign(content, {message_reference: {
+    public async reply(message: MessageRequest, filepath?: Array<string>): Promise<void> {
+        let resp: DiscordAPIResponse;
+        let messageReference = {
             type: 0,
             message_id: this.id,
             channel_id: this.channel?.id,
             guild_id: this.guildId,
             fail_if_not_exists: true
-        }}), "messages", token, filepath)
-        console.dir((await resp), { depth: null})
+        }
+        if(filepath){
+            let request = mediaSend(filepath, Object.assign(message, {message_reference: messageReference}))
+            resp = await REST.Channels.post(this.channelId, request.finalize(), "messages", token, `multipart/form-data; boundary=${request.boundary}`)
+        } else {
+            resp = await REST.Channels.post(this.channelId, Object.assign(message, {message_reference: messageReference}), "messages", token)
+        }
+        console.dir((await resp), { depth: null })
     } 
+    
     public async forward(): Promise<void> {
         const resp = await REST.Channels.post(this.channelId, {
             message_reference: {

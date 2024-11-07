@@ -1,10 +1,8 @@
-import { User } from "../classes/Guild/User";
-import { ChannelTypes } from "../enums/ChannelTypes";
 import { REST } from "../rest/REST";
 import { discordChannel } from "../types/Discord/discordChannel";
-import { MessageRequest } from "../types/Discord/discordMessageOptions";
 import { Emoji } from "../types/Media/Emoji";
-import { CategoryChannel } from "./CategoryChannel";
+import { MessageRequest } from "../types/Discord/discordMessageOptions";
+import { mediaSend } from "../util/mediaSend";
 let botToken: string;
 
 /**
@@ -64,15 +62,15 @@ export class DMChannel extends Map<string, channelMapValue> {
     }
     /**
      * Sends a message to the channel
-     * @param message MessageRequest object
+     * @param {MessageRequest} message MessageRequest object
      */
-    public async sendMessage(message, filepath?: Array<string>): Promise<void>{
-        let response = await REST.Channels.post(this.id, message, 'messages', botToken, filepath)
+    public async sendMessage(message: MessageRequest): Promise<void>{
+        let response = await REST.Channels.post(this.id, message, 'messages', botToken)
         console.log((await response))
     }
     /**
      * Deletes a message.
-     * @param id ID of the Message to delete in the channel
+     * @param {string} id ID of the Message to delete in the channel
      */
     public async deleteMessage(id: string): Promise<void> {
         let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken)
@@ -80,8 +78,8 @@ export class DMChannel extends Map<string, channelMapValue> {
     }
      /**
      * Creates a reaction.
-     * @param messageId ID of the target Message
-     * @param emojiName Name of the emoji (if using custom emoji => name:id)
+     * @param {string} messageId ID of the target Message
+     * @param {string} emojiName Name of the emoji (if using custom emoji => name:id)
      */
     public async reactMessage(messageId: string, emojiName: string): Promise<void>{
         let response = await REST.Channels.put(this.id, `/messages/${messageId}/reactions/${emojiName}/@me`, botToken)
@@ -129,10 +127,19 @@ export class GuildChannel extends Map<string, channelMapValue> {
      * Sends a message to the channel
      * @param message MessageRequest object
      */
-    public async sendMessage(message, filepath?: Array<string>): Promise<void>{
-        let response = await REST.Channels.post(this.id, message, 'messages', botToken, filepath)
-        console.dir((await response), { depth: null})
-    }
+    public async sendMessage(message: MessageRequest, filepath?: Array<string>): Promise<void>{
+        let response;
+        // If the message contains attachments, attempt to make a multipart request
+        if(filepath){
+            // Multi-part request
+            let request = mediaSend(filepath, message)   
+            let response = await REST.Channels.post(this.id, request[0], 'messages', botToken, request[1])     
+        } else {
+            response = await REST.Channels.post(this.id, message, 'messages', botToken)
+            console.dir((await response), { depth: null})
+        }
+    }  
+
     /**
      * Deletes a message.
      * @param id ID of the Message to delete in the channel
@@ -141,6 +148,7 @@ export class GuildChannel extends Map<string, channelMapValue> {
         let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken )
         console.log((await response))
     }
+
      /**
      * Creates a reaction.
      * @param messageId ID of the target Message

@@ -134,65 +134,32 @@ async function getChannel(id: string, token: string): Promise<DiscordAPIResponse
 /**
  * Function to send a POST to the channel endpoint
  * @param {string} id Channel ID.
- * @param {MessageRequest} message Body of the request in JSON.
+ * @param {object|string} message Body of the request in JSO N.
  * @param {string} endpoint The endpoint to use.
  * @param {string} token Token of the bot
  * @param {Array<string>} filepath Array of strings representing paths to files to send (OPTIONAL)
  * @returns {Promise<DiscordAPIResponse>}
  */
-async function postChannel(id: string, message: MessageRequest, endpoint: string, token: string, filepath?: Array<string>): Promise<DiscordAPIResponse>{
-    let messageBody: string = "";
-    let contentType: string = "application/json";
+async function postChannel(id: string, message: object|string, endpoint: string, token: string, contentType?: string): Promise<DiscordAPIResponse>{
 
-    // If the message contains attachments, attempt to make a multipart request
-    if(filepath){
-        // Throw an error if files aren't present
-        
-        // Multi-part request
-        let request = new MultiPartRequest()
-        .contentOptions({
-            contentDisposition: "name=\"payload_json\"",
-            contentType: "application/json"
-        })
-        .insertJSONData(message)
-        
-        // Iterating over array to attach each file to the request
-        filepath.forEach((file) => {
-            request.insertBoundary() //
-            let match = file.match(/([^\\]*$)/)
-
-            if(match !== null){
-                let filename = match[0]
-                request.contentOptions({
-                    contentDisposition: `name=\"files[${filepath.indexOf(file)}]\"; filename=\"${filename}\"`,
-                    contentType: ContentTypes[filename.match(/([^\.]*$)/)![0]],
-                    contentTransferEncoding: 'base64'
-                })
-                request.insertBase64(file)
-            } else {
-                throw new Error(`Couldn't find such a file: ${file}!`)
-            }
-        })
-        request.endBoundary()
-        
-        // Setting Content-Type header
-        contentType = `multipart/form-data; boundary=${request.boundary}`
-        // Changing the Message body to the request
-        messageBody = request.finalize()
-
+    let body: string;
+    if(typeof message === "object"){
+        body = JSON.stringify(message)
+    } else if(typeof message === "string"){
+        body = message
     } else {
-        // JSON Object => string
-        messageBody = JSON.stringify(message)
+        throw new Error("Message parameter is of a unsupported type!")
     }
-
+    
+    console.log('B')
     let response = await fetch(`${apiUrls.regularURI}/channels/${id}/${endpoint}`, {
         method: 'POST',
         headers: {
             'Authorization': `Bot ${token}`,
-            'Content-Type': contentType,
+            'Content-Type': contentType ? contentType : 'application/json', // Defaults to application/json!
             "User-Agent": "DiscordBot (mars-le-tour 1.0.0)"
         },
-        body: messageBody
+        body: body
     })
     return (await response.json())
 }
