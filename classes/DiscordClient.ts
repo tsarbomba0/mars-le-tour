@@ -9,6 +9,8 @@ import { InteractionOptions } from "../types/Options/InteractionOptions";
 import { Interaction } from "./interactions/Interaction";
 import { discordGuildOptions } from "../types/Discord/discordGuildOptions";
 import { Message } from "./Message";
+import { REST } from "../rest/REST";
+import { DMChannel } from "./Channel";
 
 
 /**
@@ -238,5 +240,14 @@ export class DiscordClient extends EventEmitter {
         })        
     }
     // methods
+
+
+    public async createDM(userId: string): Promise<DMChannel>{
+        let channelOptions = await REST.Users.post({
+            recipient_id: userId
+        }, this.token)
+        const channel = new DMChannel(channelOptions, this.token)
+        return channel
+    }
     
 }   

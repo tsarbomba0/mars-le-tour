@@ -1,17 +1,11 @@
 import { Events } from './enums/Events'
 import { DiscordClient } from './classes/DiscordClient'
-import { integerOption, stringOption } from './classes/Option'
-import { SlashCommand } from './classes/interactions/SlashCommand'
 import { token, token2 } from './constants'
 import { Interaction } from './classes/interactions/Interaction'
-import { Embed } from './classes/Embed'
-import { Button } from './classes/Components/Button'
 import { ActionRow } from './classes/Components/ActionRow'
 import { TextInput } from './classes/components/TextInput'
 import { Message } from './classes/Message'
 import { Attachment } from './classes/Attachment'
-import { MultiPartRequest } from './util/multipartRequest'
-const fs = require('fs')
 const client = new DiscordClient(token2)
 
 client.on(Events.messageCreate, async (msg: Message) => {
@@ -31,11 +25,21 @@ client.on(Events.messageCreate, async (msg: Message) => {
      ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
     )
     */
-    msg.reply({ 
-        content: "Test!"
-    },
-     ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
-    )
+    if(msg.content === "TEST1"){
+        msg.reply({ 
+            content: "Test!"
+        },
+         ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
+        )
+    }
+    if(msg.content === "TEST2"){
+        let DM = await client.createDM(msg.author.id)
+        console.log(DM)
+        DM.sendMessage({
+            content: "Test!"
+        })
+
+    }
 
 })
 
@@ -60,5 +64,4 @@ client.on(Events.interactionCreate, async (interaction: Interaction) => {
         await interaction.replyModal({ title: "Modal.", custom_id: "Modal", components: [modal]})
         console.log(interaction.guild?.get("id"))
     }
-
 })

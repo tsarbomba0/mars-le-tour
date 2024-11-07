@@ -3,13 +3,14 @@ import { discordChannel } from "../types/Discord/discordChannel";
 import { Emoji } from "../types/Media/Emoji";
 import { MessageRequest } from "../types/Discord/discordMessageOptions";
 import { mediaSend } from "../util/mediaSend";
+import { User } from "./Guild/User";
 let botToken: string;
 
 /**
  * A type for the value in the maps used for channel classes
  * represents a number, boolean, string, Array of objects, Emoji or null
  */
-type channelMapValue = number|null|boolean|string|Array<object>|Emoji
+type channelMapValue = number|null|boolean|string|Array<object>|Emoji|undefined|Map<string, User>
 
 /**
  * Class for a Discord Voice Channel 
@@ -24,7 +25,7 @@ export class VoiceChannel extends Map<string, channelMapValue> {
     rtc_region: string|null;
     rate_limit_per_user: number;
     position: number;
-    user_limit: number|null;
+    user_lim it: number|null;
     iconEmoji: Emoji;
     flags: number;
     bitrate: number;
@@ -32,7 +33,7 @@ export class VoiceChannel extends Map<string, channelMapValue> {
     constructor(payload: discordChannel, token: string){
         super();
         this.id = payload.id;
-        this.parentId = payload.parent_id;
+        this.parentId = payload.parent_id!;
         this.name = payload.name;
         this.set("id", payload.id)
         this.set("parentId", payload.parent_id)
@@ -53,20 +54,39 @@ export class VoiceChannel extends Map<string, channelMapValue> {
  */
 export class DMChannel extends Map<string, channelMapValue> {
     id: string;
-    parentId: string;
-    constructor(payload, token: string){
-        super(payload)
+    flags: number;
+    constructor(payload: discordChannel, token: string){
+        super()
+        console.log(payload)
         this.id = payload.id
-        this.parentId = payload.parent_id
+        this.flags = payload.flags
+
+        this.set("id", payload.id)
+        this.set("flags", payload.flags)
+        this.set("recipients", new Map<string, User>())
+        payload.recipients?.forEach((user) => {
+            (this.get("recipients") as Map<string, User>).set(user.id, new User(user))
+        })
+        
+        
         botToken = token
     }
     /**
      * Sends a message to the channel
-     * @param {MessageRequest} message MessageRequest object
+     * @param {MessageRequest} message Message to send.
+     * @param {filepath}[filepath] filepath Array of paths to media files.
      */
-    public async sendMessage(message: MessageRequest): Promise<void>{
-        let response = await REST.Channels.post(this.id, message, 'messages', botToken)
-        console.log((await response))
+    public async sendMessage(message: MessageRequest, filepath?: Array<string>): Promise<void>{
+        let response;
+        // If the message contains attachments, attempt to make a multipart request
+        if(filepath){
+            // Multi-part request
+            let request = mediaSend(filepath, message)   
+            let response = await REST.Channels.post(this.id, request[0], 'messages', botToken, request[1])     
+        } else {
+            response = await REST.Channels.post(this.id, message, 'messages', botToken)
+            console.dir((await response), { depth: null})
+        }
     }
     /**
      * Deletes a message.
@@ -106,7 +126,7 @@ export class GuildChannel extends Map<string, channelMapValue> {
     constructor(payload: discordChannel, token: string){
         super();
         this.id = payload.id
-        this.parentId = payload.parent_id
+        this.parentId = payload.parent_id!
         this.name = payload.name
         this.set('type', 0);
         this.set('topic', payload.topic);
@@ -125,7 +145,8 @@ export class GuildChannel extends Map<string, channelMapValue> {
 
     /**
      * Sends a message to the channel
-     * @param message MessageRequest object
+     * @param {MessageRequest} message Message to send.
+     * @param {filepath}[filepath] filepath Array of paths to media files.
      */
     public async sendMessage(message: MessageRequest, filepath?: Array<string>): Promise<void>{
         let response;

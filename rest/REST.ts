@@ -1,10 +1,10 @@
 import { DMChannel } from "../classes/Channel.ts"
 import { User } from "../classes/Guild/User.ts"
-import { Message, messageOptions } from "../classes/Message"
 import { apiUrls } from "../enums/ApiURLs"
 import { ContentTypes } from "../enums/ContentTypes.ts"
 import { interactionCallback } from "../enums/InteractionCallback"
 import { DiscordAPIResponse } from "../types/Discord/discordAPIResponse"
+import { discordChannel } from "../types/Discord/discordChannel.ts"
 import { MessageRequest } from "../types/Discord/discordMessageOptions"
 import { userPatchRequest } from "../types/Discord/discordRequestTypes.ts"
 import { MultiPartRequest } from "../util/multipartRequest"
@@ -101,13 +101,17 @@ async function patchUser(options: userPatchRequest, token: string): Promise<User
     }
 }
 
-async function postUser(options: object, token: string): Promise<DiscordAPIResponse|DMChannel>{
+async function postUser(options: object, token: string): Promise<discordChannel>{
     let response = await fetch(`${apiUrls.regularURI}/users/@me/channels`,{
         method: 'POST',
         headers: Object.assign(headerObject, {'Authorization': `Bot ${token}`}),
         body: JSON.stringify(options)
     })
-    return (await response.json())
+    if(response.ok){
+        return (await response.json() as discordChannel)
+    } else {
+        throw new Error(await response.json())
+    }
 }
 
 const Users = {
@@ -161,7 +165,8 @@ async function postChannel(id: string, message: object|string, endpoint: string,
         },
         body: body
     })
-    return (await response.json())
+    
+    return (await response.json() as DiscordAPIResponse)
 }
 /**
  * Function to send a DELETE to the channel endpoint
