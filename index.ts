@@ -26,10 +26,11 @@ client.on(Events.messageCreate, async (msg: Message) => {
     )
     */
     if(msg.content === "TEST1"){
+        msg.guildId ? console.log(client.guilds.get(msg.guildId)) : console.log("No guild!!!")
         msg.reply({ 
             content: "Test!"
         },
-         ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
+         ["/home/user/Downloads/janedoe1.jpg"]
         )
     }
     if(msg.content === "TEST2"){
