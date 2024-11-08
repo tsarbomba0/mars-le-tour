@@ -2,10 +2,10 @@ import { Events } from './enums/Events'
 import { DiscordClient } from './classes/DiscordClient'
 import { token, token2 } from './constants'
 import { Interaction } from './classes/interactions/Interaction'
-import { ActionRow } from './classes/Components/ActionRow'
 import { TextInput } from './classes/components/TextInput'
 import { Message } from './classes/Message'
 import { Attachment } from './classes/Attachment'
+import { ActionRow } from './classes/components/ActionRow'
 const client = new DiscordClient(token2)
 
 client.on(Events.messageCreate, async (msg: Message) => {
@@ -37,7 +37,7 @@ client.on(Events.messageCreate, async (msg: Message) => {
         console.log(DM)
         DM.sendMessage({
             content: "Test!"
-        })
+        }, ["/home/user/Downloads/janedoe1.jpg"])
 
     }
 

@@ -1,3 +1,4 @@
+import { discordUser } from "../../classes/Guild/User";
 import { Emoji } from "../Media/Emoji";
 
 /**
@@ -19,4 +20,5 @@ export type discordChannel = {
     rtc_region: string|null;
     bitrate: number;
     user_limit: number;
+    recipients: Array<discordUser>;
 }

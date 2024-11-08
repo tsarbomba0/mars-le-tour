@@ -79,13 +79,13 @@ export class DMChannel extends Map<string, channelMapValue> {
     public async sendMessage(message: MessageRequest, filepath?: Array<string>): Promise<void>{
         let response;
         // If the message contains attachments, attempt to make a multipart request
-        if(filepath){
+        if(filepath !== undefined){
             // Multi-part request
             let request = mediaSend(filepath, message)   
-            let response = await REST.Channels.post(this.id, request[0], 'messages', botToken, request[1])     
+            let response = await REST.Channels.post(this.id, request.finalize(), 'messages', botToken, `multipart/form-data; boundary=${request.boundary}`)     
         } else {
             response = await REST.Channels.post(this.id, message, 'messages', botToken)
-            console.dir((await response), { depth: null})
+            console.dir((await response), { depth: null })
         }
     }
     /**
@@ -154,7 +154,7 @@ export class GuildChannel extends Map<string, channelMapValue> {
         if(filepath){
             // Multi-part request
             let request = mediaSend(filepath, message)   
-            let response = await REST.Channels.post(this.id, request[0], 'messages', botToken, request[1])     
+            let response = await REST.Channels.post(this.id, request.finalize(), 'messages', botToken, `multipart/form-data; boundary=${request.boundary}`)     
         } else {
             response = await REST.Channels.post(this.id, message, 'messages', botToken)
             console.dir((await response), { depth: null})

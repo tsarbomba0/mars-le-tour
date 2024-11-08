@@ -152,7 +152,7 @@ async function postChannel(id: string, message: object|string, endpoint: string,
     } else if(typeof message === "string"){
         body = message
     } else {
-        throw new Error("Message parameter is of a unsupported type!")
+        throw new Error(`Message parameter is of a unsupported type! (${typeof message})`)
     }
     
     console.log('B')
