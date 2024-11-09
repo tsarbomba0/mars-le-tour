@@ -68,7 +68,6 @@ export class DMChannel extends Map<string, channelMapValue> {
             (this.get("recipients") as Map<string, User>).set(user.id, new User(user))
         })
         
-        
         botToken = token
     }
     /**
@@ -93,7 +92,7 @@ export class DMChannel extends Map<string, channelMapValue> {
      * @param {string} id ID of the Message to delete in the channel
      */
     public async deleteMessage(id: string): Promise<void> {
-        let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken)
+        let response = await REST.Channels.HTTPDelete(this.id, `messages/${id}`, botToken)
         console.log((await response))
     }
      /**
@@ -108,6 +107,7 @@ export class DMChannel extends Map<string, channelMapValue> {
 }
 /**
  * Class for a Discord Guild Channel 
+ * @params {discordChannel} payload
  */
 export class GuildChannel extends Map<string, channelMapValue> {
     id: string;
@@ -128,7 +128,6 @@ export class GuildChannel extends Map<string, channelMapValue> {
         this.id = payload.id
         this.parentId = payload.parent_id!
         this.name = payload.name
-        this.set('type', 0);
         this.set('topic', payload.topic);
         this.set('rateLimit', payload.rate_limit_per_user);
         this.set('position', payload.position);
@@ -166,7 +165,7 @@ export class GuildChannel extends Map<string, channelMapValue> {
      * @param id ID of the Message to delete in the channel
      */
     public async deleteMessage(id: string): Promise<void> {
-        let response = await REST.Channels.delete(this.id, `messages/${id}`, botToken )
+        let response = await REST.Channels.HTTPDelete(this.id, `messages/${id}`, botToken )
         console.log((await response))
     }
 
