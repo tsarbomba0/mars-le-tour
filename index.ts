@@ -31,12 +31,13 @@ client.on(Events.messageCreate, async (msg: Message) => {
    
     if(msg.content === "TEST1"){
         console.log(client.guilds.get(msg.guildId!))
+        client.setPresence(ActivityTypes.watching, "dnd", 0, "Assez de sang.")
         msg.reply({ 
             content: "Test!"
         },
          ["/home/user/Downloads/janedoe1.jpg"]
         )
-        client.setPresence(ActivityTypes.watching, "dnd", 0, "Testing.")
+        
     }
     if(msg.content === "TEST2"){
         let DM = await client.createDM(msg.author.id)

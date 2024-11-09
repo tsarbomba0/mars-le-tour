@@ -50,7 +50,8 @@ export class DiscordClient extends EventEmitter {
         this.guilds = new Map()
 
 
-        // Closed connection (will attempt to reconnect on status codes in resumeCodes)
+        // In case of the connection being closed.
+        // Will reconnect if the code is in the resumeCodes array.
         this.gatewayApiConnection.on('close', (code) => {
             console.log(`Connection closed! Code: ${code}`)
             if(this.resumeCodes.includes(code)){
@@ -62,16 +63,19 @@ export class DiscordClient extends EventEmitter {
                         session_id: this.sessionId,
                         seq: this.heartbeatValue,
                     }
-                }))
+                }), (error) => {
+                    throw error
+                })
             }
-
+            console.log("Reconnected")
         })
 
-        this.gatewayApiConnection.on('error', (err) =>{
-            console.log(err) // This should not fire!
+        // In case of an error.
+        this.gatewayApiConnection.on('error', (error) =>{
+            throw error
         })
 
-        // on open
+        // On opened connection.
         this.gatewayApiConnection.on('open', async (): Promise<void> => {
             this.gatewayApiConnection.on('message', async (rawMessage: WebSocket.RawData): Promise<void> => {
                 let jsonMessage: discordPayload = JSON.parse(rawMessage.toString()) // Message converted to String from Buffer and parsed to a object
@@ -221,25 +225,24 @@ export class DiscordClient extends EventEmitter {
                             break;
                         }
                         break;
-                    case 10: // OPCODE 10
+
+                    // OPCODE 10
+                    case 10: 
+                        // If d field contains heartbeat_interval, set it as the new one.
                         if(jsonMessage?.d?.heartbeat_interval){
                             this.heartbeatInterval = jsonMessage.d.heartbeat_interval; 
                         }
-                        // Timeout to send a opcode 1 reply in (heartbeatInterval*Math.random()) ms
+
+                        // Timeout to send a opcode 1 reply in (heartbeatInterval*jitter) ms.
+                        // Jitter is a random number between 0 and 1.
                         setTimeout(() => {
                             this.gatewayApiConnection.send(JSON.stringify({
                                 op: 1,
                                 d: this.heartbeatValue
                             }))
                         }, this.heartbeatInterval*Math.random());
+
                         // IDENTIFY payload
-                        /// Presence for the payload
-                        let presence: BotPresence;
-                        if(presenceOptions){
-                            presence = new BotPresence(presenceOptions.type ? presenceOptions.type : ActivityTypes.custom, presenceOptions.status, null)
-                        } else {
-                            presence = new BotPresence(ActivityTypes.custom, "online", null)
-                        }
                         this.gatewayApiConnection.send(JSON.stringify({
                             op: 2,
                             d: {
@@ -250,9 +253,9 @@ export class DiscordClient extends EventEmitter {
                                     browser: 'Mars-le-Tour',
                                     device: 'Mars-le-Tour'
                                 },
-                                presence: presence
                             }}));
-                        // send a heartbeat every heatbeatInterval ms with opcode 1 and data field as the last message's s field
+
+                        // Send a heartbeat every heatbeatInterval ms with opcode 1 and data field as the last message's sequence field
                         (async () =>{
                             setInterval(() => {
                                 this.gatewayApiConnection.send(JSON.stringify({
@@ -261,6 +264,7 @@ export class DiscordClient extends EventEmitter {
                                 }))
                             }, this.heartbeatInterval)
                         })();
+                        
                         break;
                 }
             })
@@ -296,13 +300,11 @@ export class DiscordClient extends EventEmitter {
         url?: URL, 
         isAfk?: boolean
     ){
-        let presence = JSON.stringify({
-            op: 3,
-            d: new BotPresence(type, status, afkSince, name, url, isAfk)
-        }, null, 2)
-        console.dir(presence, {depth:null})
         this.gatewayApiConnection.send(
-            presence
+            JSON.stringify({
+                op: 3,
+                d: new BotPresence(type, status, afkSince, name, url, isAfk)
+            }, null, 2)
         )
     }
     
