@@ -1,4 +1,4 @@
-import { EventEmitter } from "stream";
+const { EventEmitter } = require('events');
 import { Events } from '../enums/Events'
 import { discordPayload, discordPayloadData } from "../types/Discord/discordPayload";
 import { User } from "./Guild/User";
@@ -8,9 +8,13 @@ import { GuildMember } from "./Guild/GuildMember";
 import { InteractionOptions } from "../types/Options/InteractionOptions";
 import { Interaction } from "./interactions/Interaction";
 import { discordGuildOptions } from "../types/Discord/discordGuildOptions";
-import { Message } from "./Message";
+import { Message, messageOptions } from "./Message";
 import { REST } from "../rest/REST";
 import { DMChannel } from "./Channel";
+import { discordPresenceUpdate } from '../types/Discord/discordPresence';
+import { BotPresence, discordStatus } from './BotPresence';
+import { ActivityTypes } from '../enums/ActivityTypes';
+import { URL } from '../types/Media/URL';
 
 
 /**
@@ -33,7 +37,11 @@ export class DiscordClient extends EventEmitter {
     ready: boolean = false;
     token: string;
     
-    constructor(token: string){
+    constructor(token: string, presenceOptions?: {
+        type?: ActivityTypes,
+        name?: string,
+        status: discordStatus
+    }){
         super();
 
         // property assignment
@@ -68,17 +76,21 @@ export class DiscordClient extends EventEmitter {
             this.gatewayApiConnection.on('message', async (rawMessage: WebSocket.RawData): Promise<void> => {
                 let jsonMessage: discordPayload = JSON.parse(rawMessage.toString()) // Message converted to String from Buffer and parsed to a object
                 this.heartbeatValue = jsonMessage.s // value of s key from messages to continue heartbeat to the gateway
-                let gatewayData: discordPayloadData | null = jsonMessage.d  
-
+                let gatewayData: unknown | null = jsonMessage.d  
                 // Switch case for opcodes
                 switch(jsonMessage.op){
                     case 0: // OPCODE 0 -> dispatch event
                         switch(jsonMessage.t){
                             // READY => this case DOESN'T emit the event, the GUILD_CREATE case does under a special condition
                             case Events.ready: if(gatewayData){
+                                let data: discordPayloadData = gatewayData as discordPayloadData
                                 [this.user, this.sessionId, this.resumeUrl, this.launchExpectedGuilds] = 
-                                [gatewayData.user, gatewayData.session_id, gatewayData.resume_gateway_url, gatewayData.guilds.length]
-                                console.log(this.launchExpectedGuilds)
+                                [
+                                    data.user, 
+                                    data.session_id, 
+                                    data.resume_gateway_url, 
+                                    data.guilds.length
+                                ]
                             };
                             break;
 
@@ -89,7 +101,7 @@ export class DiscordClient extends EventEmitter {
                             case Events.guildCreate: 
                                 if(gatewayData){
                                     let newGuild = new Guild((gatewayData as discordGuildOptions), this.token)
-                                    this.guilds.set(gatewayData.id, newGuild)
+                                    this.guilds.set(newGuild.id, newGuild)
                                     if(!this.ready){
                                         this.launchActualGuilds += 1
                                         if(this.launchActualGuilds === this.launchExpectedGuilds){
@@ -101,26 +113,26 @@ export class DiscordClient extends EventEmitter {
                             break;
                             // GUILD_DELETE
                             case Events.guildDelete:
-                                gatewayData ? this.guilds.delete(gatewayData.id) : () => {throw new Error(`Event ${Events.guildDelete} has null data`);}
+                                gatewayData ? this.guilds.delete((gatewayData as Guild).id) : () => {throw new Error(`Event ${Events.guildDelete} has null data`);}
                                 this.emit(Events.guildDelete)
                             break;
                             // GUILD_UPDATE
                             case Events.guildUpdate: 
                                 gatewayData ? true : () => {throw new Error(`Event ${Events.guildUpdate} has null data`);}
-                                let oldGuild = this.guilds.get(gatewayData!.id)!
                                 /* TODO FIGURE THIS OUT?
+                                let oldGuild = this.guilds.get(gatewayData!.id)!
                                 Object.keys(gatewayData!).map((key) => {
                                     this.guilds.get(gatewayData!.id)![key] = gatewayData![key]
                                 })
                                 */
-                                this.guilds.set(gatewayData!.id, new Guild((gatewayData as discordGuildOptions), this.token))  // To be replaced
+                                this.guilds.set((<Guild>gatewayData)!.id, new Guild((gatewayData as discordGuildOptions), this.token))  // To be replaced
                                 this.emit(Events.guildUpdate)
                             break;   
                             // GUILD_MEMBER_ADD
                             case Events.guildMemberAdd: 
                                 gatewayData ? true : () => {throw new Error(`Event ${Events.guildMemberAdd} has null data`);}
                                 Object.keys(gatewayData!).map((key) => {
-                                    this.guilds.get(gatewayData!.id)!.members.push((gatewayData! as GuildMember)) 
+                                    this.guilds.get((<Guild>gatewayData)!.id)!.members.set((<Guild>gatewayData)!?.id!, (gatewayData! as GuildMember)) 
                                 })
                                 this.emit(Events.guildMemberAdd)
                             break; 
@@ -138,19 +150,19 @@ export class DiscordClient extends EventEmitter {
                             */
                             // MESSAGE_CREATE
                             case Events.messageCreate: 
-                                gatewayData ? this.emit(Events.messageCreate, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageCreate} has null data`);}
+                                gatewayData ? this.emit(Events.messageCreate, new Message((gatewayData as messageOptions), this)) :  () => {throw new Error(`Event ${Events.messageCreate} has null data`);}
                             break;
                             // MESSAGE_DELETE
                             case Events.messageDelete: 
-                                gatewayData ? this.emit(Events.messageDelete, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageDelete} has null data`);}
+                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDelete} has null data`);}
                             break;
                             // MESSAGE_UPDATE
                             case Events.messageUpdate: 
-                                gatewayData ? this.emit(Events.messageUpdate, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageUpdate} has null data`);}
+                                gatewayData ? this.emit(Events.messageUpdate, new Message((gatewayData as messageOptions), this)) :  () => {throw new Error(`Event ${Events.messageUpdate} has null data`);}
                             break;
                             // MESSAGE_DELETE_BULK
                             case Events.messageDeleteBulk: 
-                                gatewayData ? this.emit(Events.messageDelete, new Message(gatewayData, this)) :  () => {throw new Error(`Event ${Events.messageDeleteBulk} has null data`);}
+                                gatewayData ? this.emit(Events.messageDelete, gatewayData) :  () => {throw new Error(`Event ${Events.messageDeleteBulk} has null data`);}
                             break;
 
                             /*
@@ -186,19 +198,26 @@ export class DiscordClient extends EventEmitter {
                             break;
                             // THREAD_UPDATE
                             case Events.threadUpdate:
-                                gatewayData ? this.emit(Events.threadUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadUpdate} has null data`);}
+                                gatewayData ? this.emit(Events.threadUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadUpdate} has null data`)}
                             break;
                             // THREAD_LIST_SYNC
                             case Events.threadListSync:
-                                gatewayData ? this.emit(Events.threadListSync, gatewayData) : () => {throw new Error(`Event ${Events.threadListSync} has null data`);}
+                                gatewayData ? this.emit(Events.threadListSync, gatewayData) : () => {throw new Error(`Event ${Events.threadListSync} has null data`)}
                             break;
                             // THREAD_MEMBER_UPDATE
                             case Events.threadMemberUpdate:
-                                gatewayData ? this.emit(Events.threadMemberUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMemberUpdate} has null data`);}
+                                gatewayData ? this.emit(Events.threadMemberUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMemberUpdate} has null data`)}
                             break;
                             // THREAD_MEMBERS_UPDATE
                             case Events.threadMembersUpdate:
-                                gatewayData ? this.emit(Events.threadMembersUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMembersUpdate} has null data`);}
+                                gatewayData ? this.emit(Events.threadMembersUpdate, gatewayData) : () => {throw new Error(`Event ${Events.threadMembersUpdate} has null data`)}
+                            break;
+
+                            /*
+                            Presence events
+                            */
+                            case Events.presenceUpdate:
+                                gatewayData ? this.emit(Events.presenceUpdate, (gatewayData as discordPresenceUpdate)) : () => {throw new Error(`Event ${Events.presenceUpdate} has null data!`)}
                             break;
                         }
                         break;
@@ -214,6 +233,13 @@ export class DiscordClient extends EventEmitter {
                             }))
                         }, this.heartbeatInterval*Math.random());
                         // IDENTIFY payload
+                        /// Presence for the payload
+                        let presence: BotPresence;
+                        if(presenceOptions){
+                            presence = new BotPresence(presenceOptions.type ? presenceOptions.type : ActivityTypes.custom, presenceOptions.status, null)
+                        } else {
+                            presence = new BotPresence(ActivityTypes.custom, "online", null)
+                        }
                         this.gatewayApiConnection.send(JSON.stringify({
                             op: 2,
                             d: {
@@ -223,7 +249,8 @@ export class DiscordClient extends EventEmitter {
                                     os: 'Windows',
                                     browser: 'Mars-le-Tour',
                                     device: 'Mars-le-Tour'
-                                }
+                                },
+                                presence: presence
                             }}));
                         // send a heartbeat every heatbeatInterval ms with opcode 1 and data field as the last message's s field
                         (async () =>{
@@ -239,15 +266,44 @@ export class DiscordClient extends EventEmitter {
             })
         })        
     }
-    // methods
-
-
+    
+    /**
+     * Method to create or retrive a DM channel with a user.
+     * @param {string} userId The ID of the user.
+     * @returns {Promise<DMChannel>}
+     */
     public async createDM(userId: string): Promise<DMChannel>{
         let channelOptions = await REST.Users.post({
             recipient_id: userId
         }, this.token)
         const channel = new DMChannel(channelOptions, this.token)
         return channel
+    }
+
+    /**
+     * Sets the presence for the bot.
+     * @param {ActivityTypes} type Activity type.
+     * @param {discordStatus} status Discord status. 
+     * @param {number|null} afkSince Miliseconds since going off idle.
+     * @param {string} name Name of the activity. 
+     * @param {URL} url URL. 
+     * @param {boolean} isAfk If bot is afk. 
+     */
+    public async setPresence(type: ActivityTypes, 
+        status: discordStatus,
+        afkSince: number|null,
+        name?: string, 
+        url?: URL, 
+        isAfk?: boolean
+    ){
+        let presence = JSON.stringify({
+            op: 3,
+            d: new BotPresence(type, status, afkSince, name, url, isAfk)
+        }, null, 2)
+        console.dir(presence, {depth:null})
+        this.gatewayApiConnection.send(
+            presence
+        )
     }
     
 }   

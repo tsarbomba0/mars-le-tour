@@ -6,8 +6,18 @@ import { TextInput } from './classes/components/TextInput'
 import { Message } from './classes/Message'
 import { Attachment } from './classes/Attachment'
 import { ActionRow } from './classes/components/ActionRow'
-const client = new DiscordClient(token2)
+import { discordPresenceUpdate } from './types/Discord/discordPresence'
+import { ActivityTypes } from './enums/ActivityTypes'
+const client = new DiscordClient(token2, {
+    name: "test",
+    type: ActivityTypes.custom,
+    status: "idle"
+})
 
+
+client.on(Events.presenceUpdate, async (presence: discordPresenceUpdate) => {
+    console.log(presence)
+})
 client.on(Events.messageCreate, async (msg: Message) => {
     if(msg.author.id == client.user.id){
         return;
@@ -18,20 +28,15 @@ client.on(Events.messageCreate, async (msg: Message) => {
         .setFilename("testfile.jpg")
         .setDescription("A file!")
         .finalize()
-    /*
-    msg.channel?.sendMessage({ 
-        content: "Test!"
-    },
-     ["D:\\Pobrane\\test.jpg","D:\\Pobrane\\IMG_0754.png"]
-    )
-    */
+   
     if(msg.content === "TEST1"){
-        msg.guildId ? console.log(client.guilds.get(msg.guildId)) : console.log("No guild!!!")
+        console.log(client.guilds.get(msg.guildId!))
         msg.reply({ 
             content: "Test!"
         },
          ["/home/user/Downloads/janedoe1.jpg"]
         )
+        client.setPresence(ActivityTypes.watching, "dnd", 0, "Testing.")
     }
     if(msg.content === "TEST2"){
         let DM = await client.createDM(msg.author.id)
