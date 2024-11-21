@@ -1,7 +1,10 @@
+import { REST } from "../../rest/REST";
+import { DiscordAPIResponse } from "../../types/Discord/discordAPIResponse";
 import { discordGuildOptions } from "../../types/Discord/discordGuildOptions";
 import { URL } from "../../types/Media/URL";
 import { CategoryChannel } from "../CategoryChannel";
 import { DMChannel, GuildChannel, VoiceChannel } from "../Channel";
+import { AutoModerationRule } from "./AutoModerationRule";
 import { GuildMember } from "./GuildMember";
 import { Role } from "./Role";
 const ImageUrl = "https://cdn.discordapp.com"
@@ -19,7 +22,6 @@ export class Guild extends Map {
     channels: Map<string, DMChannel|VoiceChannel|GuildChannel> 
     members: Map<string, GuildMember>
     categories: Map<string, CategoryChannel>
-    presences: Map<string, object>
     roles: Map<string, Role>
 
     constructor(guildOptions: discordGuildOptions, token: string){
@@ -28,9 +30,9 @@ export class Guild extends Map {
         this.id = guildOptions.id
         this.name = guildOptions.name
         this.icon = guildOptions.icon
+
         this.set('id', guildOptions.id);
         this.set('memberCount', guildOptions.member_count);
-        
         this.set('threads', guildOptions.threads); // ^
         this.set('stageInstances', guildOptions.stage_instances); // TODO: STAGE INSTANCE OBJECT
         this.set('guildScheduledSvents', guildOptions.guild_scheduled_events); // TODO: SCHEDULED EVENT OBJECT
@@ -74,7 +76,6 @@ export class Guild extends Map {
 
         // Maps as properties of the class
         this.roles = new Map()
-        this.presences = new Map() // TODO: PARTIAL AND FULL PRESENCE OBJECTS
         this.channels = new Map<string, DMChannel|VoiceChannel|GuildChannel>
         this.categories = new Map()
 
@@ -101,15 +102,14 @@ export class Guild extends Map {
             })
         })
 
-        // Presence map
-        guildOptions.presences.forEach((presence) => {
-            this.presences.set(presence.id, presence)
-        })
 
         // Role map
         guildOptions.roles.forEach((role) => {
             this.roles.set(role.id, role)
         })
+
+        // Automoderation map 
+        // TODO?
     }
 
     /** 
@@ -139,5 +139,14 @@ export class Guild extends Map {
                 throw new Error(`Incorrect option! Got ${type}, expected: banner, icon, splash or discoverySplash`)
             break;
         }
+    }
+    
+    /**
+     * Registers a Automoderation rule in the guild via REST.
+     * @param {AutoModerationRule}rule Automoderation rule.
+     * @returns {Promise<DiscordAPIResponse>}
+     */
+    async addAutomoderationRule(rule: AutoModerationRule): Promise<DiscordAPIResponse>{
+        return await REST.Guilds.post(rule.toJSON(), this.id, "auto-moderation/rules")
     }
 }

@@ -2,6 +2,9 @@ import { ActivityTypes } from "../enums/ActivityTypes";
 import { Activity } from "../types/Discord/discordPresence";
 import { URL } from "../types/Media/URL";
 
+/**
+ * Type for discord statuses.
+ */
 export type discordStatus = "online"|"dnd"|"idle"|"invisible"|"offline"
 
 /**

@@ -3,7 +3,7 @@ import { Interactions } from "./interactionRest"
 import { Webhooks } from "./webhookRest"
 import { Users } from "./userRest"
 import { Applications } from "./applicationRest"
-
+import { Guilds } from "./guildsRest"
 
 /**
  * Main body of the REST api wrapper.
@@ -28,7 +28,11 @@ export const REST = {
     /**
      * Object containing methods related to the Application endpoint.
      */
-    Applications
+    Applications,
+    /**
+     * Object containing methods related to the Guild endpoint.
+     */
+    Guilds
 }
 
 
